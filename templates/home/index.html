@@ -1,3 +1,5 @@
+{% load static %}
+
 <!DOCTYPE html>
 <html>
 
@@ -17,37 +19,150 @@
 
 
   <!-- bootstrap core css -->
-  <link rel="stylesheet" type="text/css" href="css/bootstrap.css" />
+  <link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap.css' %}" />
   <!-- progress barstle -->
-  <link rel="stylesheet" href="css/css-circular-prog-bar.css">
+  <link rel="stylesheet" href="{% static 'css/css-circular-prog-bar.css' %}">
   <!-- fonts style -->
   <link href="https://fonts.googleapis.com/css?family=Poppins:400,700|Raleway:400,600&display=swap" rel="stylesheet">
   <!-- font wesome stylesheet -->
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
   <!-- Custom styles for this template -->
-  <link href="css/style.css" rel="stylesheet" />
+  <link href="{% static 'css/style.css' %}" rel="stylesheet" />
   <!-- responsive style -->
-  <link href="css/responsive.css" rel="stylesheet" />
+  <link href="{% static 'css/responsive.css' %}" rel="stylesheet" />
 
 
 
 
-  <link rel="stylesheet" href="css/css-circular-prog-bar.css">
+  <link rel="stylesheet" href="{% static 'css/css-circular-prog-bar.css' %}">
+
+  
 
   <style>
-  header {
-    color: black;
+      header {
+        color: black;
+      }
+
+      .hero_section {
+        color: #333333;
+      }
+
+      .hero_section h1,
+      .hero_section p,
+      .hero_section a {
+        color: #333333;
   }
 
-  .hero_section {
-    color: #333333;
+  /* General Modal Styling */
+.modal-content {
+  background-color: white;
+  border-radius: 8px;
+  border: 1px solid #f0ad4e; /* Yellow border */
+  padding: 20px;
+}
+
+.modal-header {
+  background-color: #f0ad4e; /* Yellow background */
+  color: black;
+  border-bottom: 2px solid #f0ad4e;
+  padding: 15px;
+  display: flex;
+  justify-content: center; /* Horizontally center the title */
+  align-items: center; /* Vertically center if necessary */
+}
+
+.modal-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin: 0;
+}
+
+.close {
+  color: black;
+  font-size: 1.5rem;
+}
+
+.modal-body {
+  padding: 30px;
+  background-color: #f9f9f9; /* Light grey background */
+}
+
+/* Role Selection Container */
+.roless {
+  display: flex;
+  justify-content: center;
+}
+
+.container {
+  max-width: 1200px;
+  width: 100%;
+}
+
+.role-selection {
+  display: flex;
+  justify-content: space-around;
+  flex-wrap: wrap;
+}
+
+/* Individual Role Options */
+.role-option {
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  margin: 20px;
+  padding: 30px;
+  width: 250px;
+  text-align: center;
+  transition: transform 0.3s;
+}
+
+.role-option:hover {
+  transform: translateY(-10px); /* Hover effect */
+}
+
+.role-option h3 {
+  font-size: 1.25rem;
+  color: #333;
+  font-weight: bold;
+  margin-bottom: 15px;
+}
+
+.role-option p {
+  font-size: 1rem;
+  color: #666;
+  margin-bottom: 20px;
+}
+
+/* Button Styling */
+.btn {
+  display: inline-block;
+  background-color: #f0ad4e;
+  color: black;
+  padding: 10px 20px;
+  font-size: 1rem;
+  text-decoration: none;
+  border-radius: 5px;
+  transition: background-color 0.3s, transform 0.3s;
+}
+
+.btn:hover {
+  background-color: #d88c2f; /* Darker yellow */
+  transform: scale(1.05); /* Slightly larger on hover */
+}
+
+/* Responsive Styling */
+@media (max-width: 768px) {
+  .role-selection {
+    flex-direction: column;
+    align-items: center;
   }
 
-  .hero_section h1,
-  .hero_section p,
-  .hero_section a {
-    color: #333333;
+  .role-option {
+    width: 100%;
+    margin: 10px 0;
   }
+}
+
 </style>
 
 
@@ -57,7 +172,7 @@
 <body>
   <div class="top_container">
     <!-- header section strats -->
-    <header class="header_section">
+    <header class="header_section" >
       <div class="container">
         <nav class="navbar navbar-expand-lg custom_nav-container " style="color: #333333;">
           <a class="navbar-brand" href="index.html" style="color: #333333;">
@@ -78,7 +193,7 @@
                 </li> -->
                
                 <li class="nav-item">
-                  <a class="nav-link" href="why.html" style="color: #333333;"> Sign Up </a>
+                  <a class="nav-link" href="" style="color: #333333;" data-toggle="modal" data-target="#roleModal"> Sign Up </a>
                 </li>
 
                 <li class="nav-item">
@@ -90,7 +205,7 @@
         </nav>
       </div>
     </header>
-    <section class="hero_section " >
+    <section class="hero_section ">
       <div class="hero-container container">
         <div class="hero_detail-box">
           <h1>
@@ -100,14 +215,62 @@
             Interactive lessons, fun games, and resources for students, teachers, and parents—all in one place!
           </p>
           <div class="hero_btn-continer">
-            <a href="" class="call_to-btn btn_white-border">
+            <a href="" class="call_to-btn btn_white-border" data-toggle="modal" data-target="#roleModal">
               Get Started
             </a>
+            <!-- Role Selection Modal -->
+<div class="modal fade" id="roleModal" tabindex="-1" role="dialog" aria-labelledby="roleModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="roleModalLabel">Choose Your Role</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="roless">
+          <div class="container">
+            <div class="role-selection">
+              <!-- Student Option -->
+              <div class="role-option">
+                <h3>I am a Student</h3>
+                <p>
+                  Sign up as a student and gain access to courses, resources, and more.
+                </p>
+                <a href="#" class="btn">Sign Up as Student</a>
+              </div>
+
+              <!-- Teacher Option -->
+              <div class="role-option">
+                <h3>I am a Teacher</h3>
+                <p>
+                  Join as a teacher to manage classes and create learning content.
+                </p>
+                <a href="#" class="btn">Sign Up as Teacher</a>
+              </div>
+
+              <!-- Parent Option -->
+              <div class="role-option">
+                <h3>I am a Parent</h3>
+                <p>
+                  Sign up as a parent to manage your children's learning progress.
+                </p>
+                <a href="#" class="btn">Sign Up as Parent</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
           </div>
         </div>
         <div class="hero_img-container">
           <div>
-            <img src="images/h-imgs.png" alt="" class="img-fluid">
+            <img src="{% static 'images/h-imgs.png' %}" alt="" class="img-fluid">
           </div>
         </div>
       </div>
@@ -123,7 +286,7 @@
         <div class="row">
           <div class="col-md-6">
             <div class="about_img-container">
-              <img src="images/about.png" alt="">
+              <img src="{% static 'images/about.png' %}" alt="">
             </div>
           </div>
           <div class="col-md-6">
@@ -170,7 +333,7 @@
           </div>
           <div class="col-md-6">
             <div class="admission_img-container">
-              <img src="images/admission.png" alt="">
+              <img src="{% static 'images/admission.png' %}" alt="">
             </div>
           </div>
         </div>
@@ -187,7 +350,7 @@
         <div class="row">
           <div class="col-md-6">
             <div class="why_img-container">
-              <img src="images/why.png" alt="">
+              <img src="{% static 'images/why.png' %}" alt="">
             </div>
           </div>
           <div class="col-md-6">
@@ -236,7 +399,7 @@
           </div>
           <div class="col-md-6">
             <div class="determine_img-container">
-              <img src="images/determine.png" alt="">
+              <img src="{% static 'images/determine.png' %}" alt="">
             </div>
           </div>
         </div>
@@ -266,7 +429,7 @@
                   <div class="row">
                       <div class="col-md-3">
                         <div class="client_img-box">
-                          <img src="images/client.png" alt="">
+                          <img src="{% static 'images/client.png' %}" alt="">
                         </div>
                       </div>
                       <div class="col-md-9">
@@ -285,7 +448,7 @@
                   <div class="row">
                       <div class="col-md-3">
                         <div class="client_img-box">
-                          <img src="images/client.png" alt="">
+                          <img src="{% static 'images/client.png' %}" alt="">
                         </div>
                       </div>
                       <div class="col-md-9">
@@ -304,7 +467,7 @@
                   <div class="row">
                       <div class="col-md-3">
                         <div class="client_img-box">
-                          <img src="images/client.png" alt="">
+                          <img src="{% static 'images/client.png' %}" alt="">
                         </div>
                       </div>
                       <div class="col-md-9">
@@ -370,7 +533,7 @@
             </div>
             <div class="col-md-6">
               <div class="contact_img-box">
-                <img src="images/students.jpg" alt="">
+                <img src="{% static 'images/students.jpg' %}" alt="">
               </div>
             </div>
           </div>
@@ -399,7 +562,7 @@
                 </h5>
                 <ul>
                   <li>
-                    <a href="">
+                    <a href="" data-toggle="modal" data-target="#roleModal">
                         Sign Up
                     </a>
                   </li>
@@ -443,17 +606,17 @@
                  
                   <div class="social-box">
                     <a href="">
-                      <img src="images/fb.png" alt="">
+                      <img src="{% static 'images/fb.png' %}" alt="">
                     </a>
       
                     <a href="">
-                      <img src="images/twitter.png" alt="">
+                      <img src="{% static 'images/twitter.png' %}" alt="">
                     </a>
                     <a href="">
-                      <img src="images/linkedin.png" alt="">
+                      <img src="{% static 'images/linkedin.png' %}" alt="">
                     </a>
                     <a href="">
-                      <img src="images/instagram.png" alt="">
+                      <img src="{% static 'images/instagram.png' %}" alt="">
                     </a>
                   </div>
                 </div>
@@ -469,8 +632,12 @@
   </section>
   <!-- footer section -->
 
-  <script type="text/javascript" src="js/jquery-3.4.1.min.js"></script>
-  <script type="text/javascript" src="js/bootstrap.js"></script>
+  <script type="text/javascript" src="{% static 'js/jquery-3.4.1.min.js' %}"></script>
+  <script type="text/javascript" src="{% static 'js/bootstrap.js' %}"></script>
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.0.5/dist/umd/popper.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
 
  
 </body>

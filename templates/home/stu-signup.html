@@ -1,0 +1,26 @@
+{% extends 'base.html' %} {% block content %}
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header bg-warning text-center text-black">
+          <h4>Student Sign Up</h4>
+        </div>
+        <div class="card-body">
+          <form method="POST">
+            {% csrf_token %}
+            <div class="form-group">{{ user_form.as_p }}</div>
+
+            <h5 class="mt-4">Student Information</h5>
+            <div class="form-group">{{ student_form.as_p }}</div>
+
+            <button type="submit" class="btn btn-primary btn-block">
+              Create Account
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
