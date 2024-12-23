@@ -238,7 +238,7 @@
                 <p>
                   Sign up as a student and gain access to courses, resources, and more.
                 </p>
-                <a href="#" class="btn">Sign Up as Student</a>
+                <a href="{% url 'user_signup' %}?role=student" class="btn">Sign Up as Student</a>
               </div>
 
               <!-- Teacher Option -->
@@ -247,7 +247,7 @@
                 <p>
                   Join as a teacher to manage classes and create learning content.
                 </p>
-                <a href="#" class="btn">Sign Up as Teacher</a>
+                <a href="{% url 'user_signup' %}?role=teacher" class="btn">Sign Up as Teacher</a>
               </div>
 
               <!-- Parent Option -->
@@ -256,7 +256,7 @@
                 <p>
                   Sign up as a parent to manage your children's learning progress.
                 </p>
-                <a href="#" class="btn">Sign Up as Parent</a>
+                <a href="{% url 'user_signup' %}?role=parent" class="btn">Sign Up as Parent</a>
               </div>
             </div>
           </div>

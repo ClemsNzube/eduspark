@@ -9,16 +9,25 @@ from .models import User, Student, Teacher, Parent
 
 # Sign up view for User (Student, Teacher, Parent)
 def user_signup(request):
+    role = request.GET.get('role')  # Get the role from the URL query parameters
+    if not role:
+        # If no role is selected, redirect or show an error message
+        messages.error(request, "Please select a role before signing up.")
+        return redirect('home')  # Redirect to the home page or role selection
+
     if request.method == 'POST':
+        # Handle the form submission based on the selected role
         user_form = UserSignUpForm(request.POST)
         if user_form.is_valid():
             user = user_form.save()
-            role = user.role
+            user.role = role  # Set the role from the URL parameter
+
+            # Handle the role-specific form based on the selected role
             if role == 'student':
                 student_form = StudentSignUpForm(request.POST)
                 if student_form.is_valid():
                     student = student_form.save(commit=False)
-                    student.user = user
+                    student.user = user  # Link the student to the user
                     student.save()
             elif role == 'teacher':
                 teacher_form = TeacherSignUpForm(request.POST)
@@ -32,22 +41,27 @@ def user_signup(request):
                     parent = parent_form.save(commit=False)
                     parent.user = user
                     parent.save()
-            
+
+            # Log the user in after successful signup
             login(request, user)
             messages.success(request, f'Account created for {user.email}!')
-            return redirect('home')
+            return redirect('home')  # Redirect after successful signup
+
     else:
+        # Instantiate empty forms
         user_form = UserSignUpForm()
         student_form = StudentSignUpForm()
         teacher_form = TeacherSignUpForm()
         parent_form = ParentSignUpForm()
 
-    return render(request, 'signup.html', {
+    return render(request, 'home/stu-signup.html', {
         'user_form': user_form,
         'student_form': student_form,
         'teacher_form': teacher_form,
         'parent_form': parent_form,
+        'role': role,  # Pass the selected role to the template
     })
+
 
 # Login view
 def login_view(request):

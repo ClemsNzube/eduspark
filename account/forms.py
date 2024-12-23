@@ -5,11 +5,10 @@ from .models import User, Student, Teacher, Parent
 # User Registration Form
 class UserSignUpForm(UserCreationForm):
     email = forms.EmailField(max_length=254, required=True)
-    role = forms.ChoiceField(choices=User.ROLE_CHOICES, widget=forms.RadioSelect(), required=True)
 
     class Meta:
         model = User
-        fields = ['email', 'role', 'password1', 'password2']
+        fields = ['email', 'password1', 'password2']
 
 # Student Signup Form
 class StudentSignUpForm(forms.ModelForm):

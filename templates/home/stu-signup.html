@@ -1,20 +1,67 @@
-{% extends 'base.html' %} {% block content %}
-<div class="container mt-5">
+{% extends 'home/base.html' %} {% block content %}
+<div class="container mt-5" style="max-width: 800px">
   <div class="row justify-content-center">
-    <div class="col-md-6">
-      <div class="card">
-        <div class="card-header bg-warning text-center text-black">
-          <h4>Student Sign Up</h4>
+    <div class="col-md-12">
+      <div class="card shadow" style="border-radius: 12px; overflow: hidden">
+        <!-- Card Header -->
+        <div
+          class="card-header text-center bg-warning text-black"
+          style="padding: 1.5rem"
+        >
+          <h4 style="margin: 0; font-weight: bold; text-transform: uppercase">
+            {{ role|capfirst }} Sign Up
+          </h4>
         </div>
-        <div class="card-body">
-          <form method="POST">
+
+        <!-- Card Body -->
+        <div class="card-body" style="padding: 2rem">
+          <form method="POST" style="font-size: 1rem; line-height: 1.5">
             {% csrf_token %}
-            <div class="form-group">{{ user_form.as_p }}</div>
 
-            <h5 class="mt-4">Student Information</h5>
-            <div class="form-group">{{ student_form.as_p }}</div>
+            <!-- User Form -->
+            <div class="form-group" style="margin-bottom: 1.5rem">
+              {{ user_form.as_p }}
+            </div>
 
-            <button type="submit" class="btn btn-primary btn-block">
+            <!-- Role-Specific Forms -->
+            {% if role == 'student' %}
+            <h5
+              class="mt-4 text-primary"
+              style="font-size: 1.25rem; font-weight: bold"
+            >
+              Student Information
+            </h5>
+            <div class="form-group" style="margin-bottom: 1.5rem">
+              {{ student_form.as_p }}
+            </div>
+            {% elif role == 'teacher' %}
+            <h5
+              class="mt-4 text-primary"
+              style="font-size: 1.25rem; font-weight: bold"
+            >
+              Teacher Information
+            </h5>
+            <div class="form-group" style="margin-bottom: 1.5rem">
+              {{ teacher_form.as_p }}
+            </div>
+            {% elif role == 'parent' %}
+            <h5
+              class="mt-4 text-primary"
+              style="font-size: 1.25rem; font-weight: bold"
+            >
+              Parent Information
+            </h5>
+            <div class="form-group" style="margin-bottom: 1.5rem">
+              {{ parent_form.as_p }}
+            </div>
+            {% endif %}
+
+            <!-- Submit Button -->
+            <button
+              type="submit"
+              class="btn btn-primary btn-block"
+              style="padding: 12px; font-size: 1.2rem; font-weight: bold"
+            >
               Create Account
             </button>
           </form>
