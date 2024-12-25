@@ -25,10 +25,11 @@ class StudentSignUpForm(forms.ModelForm):
 class TeacherSignUpForm(forms.ModelForm):
     subject = forms.CharField(max_length=100)
     phone_number = forms.CharField(max_length=15, required=False)
+    years_of_experience = forms.IntegerField(min_value=0, required=True)
 
     class Meta:
         model = Teacher
-        fields = ['full_name', 'subject', 'phone_number']
+        fields = ['full_name', 'subject', 'phone_number', 'years_of_experience']
 
 # Parent Signup Form
 class ParentSignUpForm(forms.ModelForm):

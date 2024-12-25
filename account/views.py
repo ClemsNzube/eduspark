@@ -45,7 +45,16 @@ def user_signup(request):
             # Log the user in after successful signup
             login(request, user)
             messages.success(request, f'Account created for {user.email}!')
-            return redirect('home')  # Redirect after successful signup
+            
+            # Redirect based on role
+            if role == 'student':
+                return redirect('student_dashboard')
+            elif role == 'teacher':
+                return redirect('teacher_dashboard')
+            elif role == 'parent':
+                return redirect('parent_dashboard')
+            else:
+                return redirect('home')
 
     else:
         # Instantiate empty forms
@@ -63,17 +72,28 @@ def user_signup(request):
     })
 
 
-# Login view
+# Login View
 def login_view(request):
     if request.method == 'POST':
         form = AuthenticationForm(request, data=request.POST)
         if form.is_valid():
             user = form.get_user()
             login(request, user)
-            return redirect('home')
+
+            # Redirect based on role
+            if user.role == 'student':
+                return redirect('student_dashboard')
+            elif user.role == 'teacher':
+                return redirect('teacher_dashboard')
+            elif user.role == 'parent':
+                return redirect('parent_dashboard')
+            else:
+                return redirect('home')  # Fallback for unexpected roles
     else:
         form = AuthenticationForm()
-    return render(request, 'login.html', {'form': form})
+    
+    return render(request, 'home/login.html', {'form': form})
+
 
 # Password Reset View
 def password_reset(request):
@@ -90,4 +110,4 @@ def password_reset(request):
 # Home page view (for logged-in users)
 @login_required
 def home(request):
-    return render(request, 'home.html')
+    return render(request, 'home/index.html')

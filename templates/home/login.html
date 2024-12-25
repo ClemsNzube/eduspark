@@ -1,0 +1,67 @@
+{% extends 'home/base.html' %} {% block content %}
+<div class="container mt-5" style="max-width: 500px">
+  <div class="row justify-content-center">
+    <div class="col-md-12">
+      <div class="card shadow-sm" style="border-radius: 10px; overflow: hidden">
+        <div
+          class="card-header text-center bg-primary text-white"
+          style="padding: 20px; font-size: 1.5rem"
+        >
+          <h4 style="margin: 0; font-weight: bold">Login</h4>
+        </div>
+        <div class="card-body" style="padding: 30px">
+          <form method="POST" style="font-size: 1rem; line-height: 1.5">
+            {% csrf_token %}
+
+            <!-- Username Field -->
+            <div class="form-group" style="margin-bottom: 20px">
+              <label for="username" style="font-weight: bold">Username:</label>
+              <input
+                type="text"
+                name="username"
+                id="username"
+                class="form-control"
+                placeholder="Enter your username"
+                required
+              />
+            </div>
+
+            <!-- Password Field -->
+            <div class="form-group" style="margin-bottom: 20px">
+              <label for="password" style="font-weight: bold">Password:</label>
+              <input
+                type="password"
+                name="password"
+                id="password"
+                class="form-control"
+                placeholder="Enter your password"
+                required
+              />
+            </div>
+
+            <!-- Submit Button -->
+            <button
+              type="submit"
+              class="btn btn-primary btn-block"
+              style="padding: 10px 15px; font-size: 1.2rem"
+            >
+              Login
+            </button>
+
+            <!-- Forgot Password Link -->
+            <div class="text-center mt-3">
+              <a
+                href="{% url 'password_reset' %}"
+                class="text-secondary"
+                style="font-size: 0.9rem"
+              >
+                Forgot Password?
+              </a>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

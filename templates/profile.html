@@ -1,0 +1,269 @@
+{% extends 'main.html' %} {% load static %} {% block content %} {% comment %}
+<style>
+  .referral-code {
+    font-size: 1.5em;
+    font-weight: bold;
+    margin: 20px 0;
+  }
+  .copy-btn {
+    padding: 10px 20px;
+    font-size: 1em;
+    cursor: pointer;
+  }
+  .copy-btn:active {
+    background-color: #ddd;
+  }
+</style>
+{% endcomment %} {% comment %}
+<script>
+  function copyToClipboard() {
+    var copyText = document.getElementById("referralCode");
+    navigator.clipboard.writeText(copyText.textContent).then(
+      function () {
+        alert("Referral code copied to clipboard!");
+      },
+      function (err) {
+        alert("Failed to copy the referral code. Please try again.");
+      }
+    );
+  }
+</script>
+{% endcomment %}
+<div
+  class="content-wrapper"
+  style="min-height: 167px; background-color: #111118"
+>
+  <section class="content-header">
+    <div class="container-fluid">
+      <div class="row mb-2">
+        <div class="col-sm-6">
+          <h1>Profile</h1>
+        </div>
+        <div class="col-sm-6">
+          <ol class="breadcrumb float-sm-right">
+            <li class="breadcrumb-item"><a href="/user">Home</a></li>
+            <li class="breadcrumb-item active">User Profile</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </section>
+  {% comment %} {% if messages %}
+  <div class="container mt-3">
+    {% for message in messages %} {% if message.tags == 'success' %}
+    <div
+      class="alert alert-success text-center alert-dismissible fade show"
+      role="alert"
+    >
+      {{ message }}
+    </div>
+    {% endif %} {% endfor %}
+  </div>
+  {% endif %} {% endcomment %}
+
+  <section class="content">
+    <div class="container-fluid">
+      <h4 style="text-align: center"></h4>
+      <form
+        method="post"
+        action="{% url 'profile' %}"
+        enctype="multipart/form-data"
+      >
+        {% csrf_token %}
+        <div class="row">
+          <div class="col-md-4">
+            <div class="card card-success card-outline">
+              <div class="card-body box-profile">
+                <div class="text-center">
+                  {% if user.image %}
+                  <img
+                    class="profile-user-img img-fluid img-circle"
+                    src="{{ user.image.url }}"
+                    alt="User profile picture"
+                  />
+                  {% else %}
+                  <!-- Provide a default placeholder image if no image is available -->
+                  <img
+                    class="profile-user-img img-fluid img-circle"
+                    src="{% static 'assets/img/logo/logo.jpg' %}"
+                    alt="User profile picture"
+                  />
+                  {% endif %}
+                </div>
+                <input
+                  type="file"
+                  name="image"
+                  id="image"
+                  class="btn btn-sm text-white"
+                  accept="image/*"
+                  style="max-width: 100%"
+                />
+                <h3 class="profile-username text-center" style="color: #8e94a9">
+                  {{ user.fullname }}
+                </h3>
+                <p class="text-muted text-center">{{ user.email }}</p>
+                <ul class="list-group list-group-unbordered mb-3">
+                  <a
+                    href="{% url 'change_password' %}"
+                    class="btn btn-success btn-sm btn-block"
+                    >Change Password</a
+                  >
+                </ul>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="card card-success card-outline">
+              <div class="card-body box-profile">
+                <ul class="list-group list-group-unbordered mb-3">
+                  <li class="list-group-item">
+                    <div class="row">
+                      <div class="col-md-6">
+                        <label for="first_name">First Name</label>
+                        <input
+                          class="form-control bg-dark text-light"
+                          id="first_name"
+                          name="first_name"
+                          type="text"
+                          value="{{ user.first_name }}"
+                          placeholder="First Name"
+                        />
+                      </div>
+                      <div class="col-md-6">
+                        <label for="last_name">Last Name</label>
+                        <input
+                          class="form-control bg-dark text-light"
+                          id="last_name"
+                          name="last_name"
+                          type="text"
+                          value="{{ user.last_name }}"
+                          placeholder="Last Name"
+                        />
+                      </div>
+                    </div>
+                  </li>
+                  <li class="list-group-item">
+                    <div class="row">
+                      <div class="col-md-6">
+                        <label for="phone">Phone</label>
+                        <input
+                          class="form-control bg-dark text-light"
+                          id="phone"
+                          name="phone"
+                          type="text"
+                          value="{{ user.phone }}"
+                          placeholder="Phone"
+                        />
+                      </div>
+                      <div class="col-md-6">
+                        <label for="dob">Date of Birth</label>
+                        <input
+                          class="form-control bg-dark text-light"
+                          type="date"
+                          id="dob"
+                          name="dob"
+                          min="1902-01-01"
+                          max="2030-12-31"
+                          value="{{ user.dob|date:'Y-m-d' }}"
+                        />
+                      </div>
+                    </div>
+                  </li>
+                  <li class="list-group-item">
+                    <div class="row">
+                      <div class="col-md-6">
+                        <label for="address1">Address 1</label>
+                        <input
+                          class="form-control bg-dark text-light"
+                          id="address1"
+                          name="address1"
+                          type="text"
+                          placeholder="Address 1"
+                          value="{{ user.address1 }}"
+                        />
+                      </div>
+                      <div class="col-md-6">
+                        <label for="address2">Address 2</label>
+                        <input
+                          class="form-control bg-dark text-light"
+                          id="address2"
+                          name="address2"
+                          type="text"
+                          placeholder="Address 2"
+                          value="{{ user.address2 }}"
+                        />
+                      </div>
+                    </div>
+                  </li>
+                  <li class="list-group-item">
+                    <div class="row">
+                      <div class="col-md-6">
+                        <label for="country">Country</label>
+                        <input
+                          class="form-control bg-dark text-light"
+                          id="country"
+                          name="country"
+                          type="text"
+                          value="{{ user.country }}"
+                          placeholder="Country"
+                        />
+                      </div>
+                      <div class="col-md-6">
+                        <label for="state">State</label>
+                        <input
+                          class="form-control bg-dark text-light"
+                          id="state"
+                          name="state"
+                          type="text"
+                          placeholder="State"
+                          value="{{ user.state }}"
+                        />
+                      </div>
+                    </div>
+                  </li>
+                  <li class="list-group-item">
+                    <div class="row">
+                      <div class="col-md-6">
+                        <label for="city">City</label>
+                        <input
+                          class="form-control bg-dark text-light"
+                          id="city"
+                          name="city"
+                          type="text"
+                          placeholder="City"
+                          value="{{ user.city }}"
+                        />
+                      </div>
+                      <div class="col-md-6">
+                        <label for="postal_code">Postal Code</label>
+                        <input
+                          class="form-control bg-dark text-light"
+                          id="postal_code"
+                          name="postal_code"
+                          type="text"
+                          placeholder="Postal Code"
+                          value="{{ user.postal_code }}"
+                        />
+                      </div>
+                    </div>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-grou text-center m-auto">
+            <button
+              class="btn btn-success btn-lg btn-block text-center"
+              type="submit"
+            >
+              Update Profile
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </section>
+</div>
+
+{% endblock content %}
