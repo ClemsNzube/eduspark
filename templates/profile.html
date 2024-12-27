@@ -64,6 +64,26 @@
   <section class="content">
     <div class="container-fluid">
       <h4 style="text-align: center"></h4>
+
+      {% if messages %}
+      <div class="container mt-3">
+        {% for message in messages %}
+        <div
+          class="alert alert-{{ message.tags }} text-center alert-dismissible fade show"
+          role="alert"
+        >
+          {{ message }}
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="alert"
+            aria-label="Close"
+          ></button>
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+
       <form
         method="post"
         action="{% url 'profile' %}"
@@ -119,25 +139,14 @@
                   <li class="list-group-item">
                     <div class="row">
                       <div class="col-md-6">
-                        <label for="first_name">First Name</label>
+                        <label for="full_name">Full Name</label>
                         <input
                           class="form-control bg-dark text-light"
-                          id="first_name"
-                          name="first_name"
+                          id="full_name"
+                          name="full_name"
                           type="text"
-                          value="{{ user.first_name }}"
-                          placeholder="First Name"
-                        />
-                      </div>
-                      <div class="col-md-6">
-                        <label for="last_name">Last Name</label>
-                        <input
-                          class="form-control bg-dark text-light"
-                          id="last_name"
-                          name="last_name"
-                          type="text"
-                          value="{{ user.last_name }}"
-                          placeholder="Last Name"
+                          value="{{ user.fullname }}"
+                          placeholder="Full Name"
                         />
                       </div>
                     </div>

@@ -1,5 +1,7 @@
 from django.contrib.auth.models import AbstractUser, BaseUserManager, Group, Permission
 from django.db import models
+from django.contrib.auth.models import User
+
 
 class CustomUserManager(BaseUserManager):
     def create_user(self, email, password=None, **extra_fields):
@@ -31,10 +33,24 @@ class User(AbstractUser):
         ('parent', 'Parent'),
     ]
 
+    # Remove the default username field
     username = None
     email = models.EmailField(unique=True)
-    role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='student')
 
+    # Custom fields
+    role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='student')
+    fullname = models.CharField(max_length=255, blank=True, null=True)
+    phone = models.CharField(max_length=15, blank=True, null=True)
+    dob = models.DateField(blank=True, null=True)
+    address1 = models.CharField(max_length=255, blank=True, null=True)
+    address2 = models.CharField(max_length=255, blank=True, null=True)
+    city = models.CharField(max_length=100, blank=True, null=True)
+    state = models.CharField(max_length=100, blank=True, null=True)
+    country = models.CharField(max_length=100, blank=True, null=True)
+    postal_code = models.CharField(max_length=20, blank=True, null=True)
+    image = models.ImageField(upload_to='profile_pics/', blank=True, null=True)
+
+    # Override group and permissions fields to avoid conflicts
     groups = models.ManyToManyField(
         Group,
         related_name='custom_user_groups',
@@ -59,10 +75,9 @@ class User(AbstractUser):
         return f"{self.email} ({self.role})"
 
 
-
 class Student(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    full_name = models.CharField(max_length=255)
+    full_name = models.CharField(max_length=255, blank=True, null=True)
     date_of_birth = models.DateField()
     student_class = models.CharField(max_length=10)  # Example: "Grade 1", "Class 6"
     address = models.TextField(blank=True)
@@ -90,4 +105,3 @@ class Parent(models.Model):
 
     def __str__(self):
         return self.full_name
-

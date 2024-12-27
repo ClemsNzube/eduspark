@@ -4,15 +4,17 @@ from .models import User, Student, Teacher, Parent
 
 class CustomUserAdmin(BaseUserAdmin):
     model = User
-    list_display = ('email', 'role', 'is_active', 'is_staff', 'is_superuser')
+    list_display = ('email', 'fullname', 'role', 'is_active', 'is_staff', 'is_superuser')
     list_filter = ('role', 'is_active', 'is_staff', 'is_superuser')
-    search_fields = ('email',)
+    search_fields = ('email', 'fullname', 'role')
     ordering = ('email',)
     readonly_fields = ('last_login', 'date_joined')
 
     fieldsets = (
         (None, {'fields': ('email', 'password')}),
-        ('Personal Info', {'fields': ('first_name', 'last_name')}),
+        ('Personal Info', {
+            'fields': ('fullname', 'phone', 'dob', 'address1', 'address2', 'city', 'state', 'country', 'postal_code', 'image'),
+        }),
         ('Permissions', {
             'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions'),
         }),
@@ -35,17 +37,17 @@ class StudentAdmin(admin.ModelAdmin):
 
 class TeacherAdmin(admin.ModelAdmin):
     model = Teacher
-    list_display = ('full_name', 'subject', 'phone_number')
+    list_display = ('full_name', 'subject', 'phone_number', 'years_of_experience')
     search_fields = ('full_name', 'subject')
     list_filter = ('subject',)
 
 class ParentAdmin(admin.ModelAdmin):
     model = Parent
-    list_display = ('full_name', 'children_count')
-    search_fields = ('full_name',)
+    list_display = ('full_name', 'phone_number', 'children_count')
+    search_fields = ('full_name', 'phone_number')
 
     def children_count(self, obj):
-        return obj.children.count()  # Get count of associated children
+        return obj.children.count()
     children_count.short_description = 'Number of Children'
 
 admin.site.register(User, CustomUserAdmin)

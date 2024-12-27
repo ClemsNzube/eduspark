@@ -11,35 +11,16 @@
         </div>
         <div class="card-body" style="padding: 30px">
           <form method="POST" style="font-size: 1rem; line-height: 1.5">
-            {% csrf_token %}
+            {% csrf_token %} {{ form.non_field_errors }}
 
-            <!-- Username Field -->
             <div class="form-group" style="margin-bottom: 20px">
-              <label for="username" style="font-weight: bold">Username:</label>
-              <input
-                type="text"
-                name="username"
-                id="username"
-                class="form-control"
-                placeholder="Enter your username"
-                required
-              />
+              {{ form.email.label_tag }} {{ form.email }}
             </div>
 
-            <!-- Password Field -->
             <div class="form-group" style="margin-bottom: 20px">
-              <label for="password" style="font-weight: bold">Password:</label>
-              <input
-                type="password"
-                name="password"
-                id="password"
-                class="form-control"
-                placeholder="Enter your password"
-                required
-              />
+              {{ form.password.label_tag }} {{ form.password }}
             </div>
 
-            <!-- Submit Button -->
             <button
               type="submit"
               class="btn btn-primary btn-block"
@@ -48,7 +29,6 @@
               Login
             </button>
 
-            <!-- Forgot Password Link -->
             <div class="text-center mt-3">
               <a
                 href="{% url 'password_reset' %}"
