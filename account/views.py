@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.forms import PasswordResetForm
-from .forms import CustomAuthenticationForm
+from .forms import LoginForm
 from django.contrib.auth.decorators import login_required
 from .forms import ProfileForm
 from django.contrib import messages
@@ -110,24 +110,26 @@ def user_signup(request):
 
 # Login View
 def login_view(request):
+    form = LoginForm(request.POST or None)
     if request.method == 'POST':
-        form = CustomAuthenticationForm(data=request.POST, request=request)
         if form.is_valid():
-            user = form.get_user()
-            login(request, user)
+            email = form.cleaned_data.get('email')
+            password = form.cleaned_data.get('password')
+            user = authenticate(request, email=email, password=password)
+            if user is not None:
+                login(request, user)
 
-            # Redirect based on role
-            if user.role == 'student':
-                return redirect('student_dashboard')
-            elif user.role == 'teacher':
-                return redirect('teacher_dashboard')
-            elif user.role == 'parent':
-                return redirect('parent_dashboard')
+                # Redirect based on the user's role
+                if user.role == 'student':
+                    return render(request, 'index.html', {'user': user})
+                elif user.role == 'teacher':
+                    return render(request, 'teachers-index.html', {'user': user})
+                elif user.role == 'parent':
+                    return render(request, 'parents-index.html', {'user': user})
+                else:
+                    return redirect('home')  # Fallback for unexpected roles
             else:
-                return redirect('home')  # Fallback for unexpected roles
-    else:
-        form = CustomAuthenticationForm()
-
+                form.add_error(None, 'Invalid email or password')
     return render(request, 'home/login.html', {'form': form})
 
 # Password Reset View
