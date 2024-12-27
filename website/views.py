@@ -16,3 +16,16 @@ def teacher_dashboard(request):
 # @login_required
 def parent_dashboard(request):
     return render(request, 'parents-index.html')
+
+ 
+def calendar(request):
+    return render(request, 'calendar.html')
+
+def grade(request):
+    return render(request, 'grade.html')
+
+def attendance(request):
+    return render(request, 'attendance.html')
+
+def report(request):
+    return render(request, 'invoice.html')

@@ -448,13 +448,13 @@
                 </a>
                 <ul class="nav nav-treeview">
                   <li class="nav-item">
-                    <a href="grade.html" class="nav-link">
+                    <a href="{% url 'grade' %}" class="nav-link">
                       <i class="far fa-circle nav-icon"></i>
                       <p>Grades</p>
                     </a>
                   </li>
                   <li class="nav-item">
-                    <a href="pages/UI/icons.html" class="nav-link">
+                    <a href="{% url 'attendance' %}" class="nav-link">
                       <i class="far fa-circle nav-icon"></i>
                       <p>Attendance Tracking</p>
                     </a>
@@ -462,7 +462,7 @@
                 </ul>
               </li>
               <li class="nav-item">
-                <a href="../pages/calendar.html" class="nav-link">
+                <a href="{% url 'calendar' %}" class="nav-link">
                   <i class="nav-icon fas fa-edit"></i>
                   <p>Calendar & Schedules</p>
                 </a>
@@ -478,7 +478,7 @@
               </li>
 
               <li class="nav-item">
-                <a href="pages/examples/invoice.html" class="nav-link">
+                <a href="{% url 'report' %}" class="nav-link">
                   <i class="nav-icon far fa-image"></i>
                   <p>Report</p>
                 </a>
