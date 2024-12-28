@@ -154,6 +154,27 @@ def home(request):
 @login_required
 def profile_view(request):
     user = request.user
+    # Determine the correct full name to display
+    full_name = None
+    if user.role == 'student':
+        try:
+            full_name = user.student.full_name
+        except Student.DoesNotExist:
+            full_name = "Student profile not found"
+    elif user.role == 'teacher':
+        try:
+            full_name = user.teacher.full_name
+        except Teacher.DoesNotExist:
+            full_name = "Teacher profile not found"
+    elif user.role == 'parent':
+        try:
+            full_name = user.parent.full_name
+        except Parent.DoesNotExist:
+            full_name = "Parent profile not found"
+    else:
+        full_name = user.fullname  # Fallback to the User model's fullname if no specific role
+
+    # Handle form submission
     if request.method == 'POST':
         form = ProfileForm(request.POST, request.FILES, instance=user)
         if form.is_valid():
@@ -165,4 +186,5 @@ def profile_view(request):
     else:
         form = ProfileForm(instance=user)
 
-    return render(request, 'profile.html', {'form': form, 'user': user})
+    # Pass the form and full name to the template
+    return render(request, 'profile.html', {'form': form, 'user': user, 'full_name': full_name})
