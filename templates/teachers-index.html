@@ -82,56 +82,34 @@
               <table>
                 <thead>
                   <tr>
+                    <th>Day</th>
                     <th>Time</th>
                     <th>Subject</th>
+                    <th>Teacher</th>
                     <th>Room</th>
                   </tr>
                 </thead>
                 <tbody>
-                  <!-- Upcoming Class 1 -->
+                  {% for timetable in timetables %}
                   <tr>
-                    <td>8:00 AM - 9:00 AM</td>
-                    <td>Mathematics</td>
-                    <td>Room 101</td>
+                    <td>{{ timetable.day_of_week }}</td>
+                    <td>
+                      {{ timetable.start_time|date:"g:i A" }} - {{
+                      timetable.end_time|date:"g:i A" }}
+                    </td>
+                    <td>{{ timetable.subject.name }}</td>
+                    <td>{{ timetable.teacher.full_name }}</td>
+                    <td>{{ timetable.room }}</td>
                   </tr>
-
-                  <!-- Upcoming Class 2 -->
+                  {% empty %}
                   <tr>
-                    <td>9:00 AM - 10:00 AM</td>
-                    <td>English</td>
-                    <td>Room 102</td>
+                    <td colspan="5">No classes scheduled.</td>
                   </tr>
-
-                  <!-- Upcoming Class 3 -->
-                  <tr>
-                    <td>10:00 AM - 11:00 AM</td>
-                    <td>Science</td>
-                    <td>Room 103</td>
-                  </tr>
-
-                  <!-- Upcoming Class 4 -->
-                  <tr>
-                    <td>11:00 AM - 12:00 PM</td>
-                    <td>History</td>
-                    <td>Room 104</td>
-                  </tr>
-
-                  <!-- Upcoming Class 5 -->
-                  <tr>
-                    <td>1:00 PM - 2:00 PM</td>
-                    <td>Art</td>
-                    <td>Room 105</td>
-                  </tr>
-
-                  <!-- Upcoming Class 6 -->
-                  <tr>
-                    <td>2:00 PM - 3:00 PM</td>
-                    <td>Physical Education</td>
-                    <td>Gym</td>
-                  </tr>
+                  {% endfor %}
                 </tbody>
               </table>
             </div>
+
             <hr />
 
             <div class="attendance-grades-container">

@@ -7,7 +7,7 @@ from django.contrib.auth.decorators import login_required
 from .forms import ProfileForm
 from django.contrib import messages
 from .forms import UserSignUpForm, StudentSignUpForm, TeacherSignUpForm, ParentSignUpForm
-from .models import User, Student, Teacher, Parent
+from .models import User, Student, Teacher, Parent, Timetable, StudentClass
 
 # Sign up view for User (Student, Teacher, Parent)
 def user_signup(request):
@@ -109,6 +109,7 @@ def user_signup(request):
 
 
 # Login View
+# Login View
 def login_view(request):
     form = LoginForm(request.POST or None)
     if request.method == 'POST':
@@ -121,16 +122,17 @@ def login_view(request):
 
                 # Redirect based on the user's role
                 if user.role == 'student':
-                    return render(request, 'index.html', {'user': user})
+                    return redirect('student_dashboard')  # Replace with your actual student dashboard URL
                 elif user.role == 'teacher':
-                    return render(request, 'teachers-index.html', {'user': user})
+                    return redirect('teacher_dashboard')  # Replace with your actual teacher dashboard URL
                 elif user.role == 'parent':
-                    return render(request, 'parents-index.html', {'user': user})
+                    return redirect('parent_dashboard')  # Replace with your actual parent dashboard URL
                 else:
                     return redirect('home')  # Fallback for unexpected roles
             else:
                 form.add_error(None, 'Invalid email or password')
     return render(request, 'home/login.html', {'form': form})
+
 
 # Password Reset View
 def password_reset(request):
@@ -188,3 +190,16 @@ def profile_view(request):
 
     # Pass the form and full name to the template
     return render(request, 'profile.html', {'form': form, 'user': user, 'full_name': full_name})
+
+
+
+def timetable_view(request):
+    # Assuming you want to display the timetable for the logged-in student's class
+    if request.user.is_authenticated and request.user.role == 'student':
+        student = Student.objects.get(user=request.user)
+        timetables = Timetable.objects.filter(student_class=student.student_class).order_by('day_of_week', 'start_time')
+    else:
+        # Default: Display all timetables
+        timetables = Timetable.objects.all().order_by('day_of_week', 'start_time')
+    
+    return render(request, 'teachers-index.html', {'timetables': timetables})

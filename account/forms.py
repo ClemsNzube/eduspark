@@ -1,7 +1,8 @@
 from django.contrib.auth import authenticate
 from django import forms
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
-from .models import User, Student, Teacher, Parent
+from .models import User, Student, Teacher, Parent, StudentClass
+
 
 # User Registration Form
 class UserSignUpForm(UserCreationForm):
@@ -14,8 +15,7 @@ class UserSignUpForm(UserCreationForm):
 # Student Signup Form
 class StudentSignUpForm(forms.ModelForm):
     date_of_birth = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
-    student_class = forms.ChoiceField(choices=[('1', 'Class 1'), ('2', 'Class 2'), ('3', 'Class 3'), 
-                                               ('4', 'Class 4'), ('5', 'Class 5'), ('6', 'Class 6')])
+    student_class = forms.ModelChoiceField(queryset=StudentClass.objects.all(), empty_label="Select Class")
     address = forms.CharField(widget=forms.Textarea, required=False)
 
     class Meta:

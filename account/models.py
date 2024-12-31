@@ -73,17 +73,26 @@ class User(AbstractUser):
 
     def __str__(self):
         return f"{self.email} ({self.role})"
+    
+class StudentClass(models.Model):
+    name = models.CharField(max_length=100)  # e.g., "Grade 1", "Class 6"
+    description = models.TextField(blank=True, null=True)
+
+    def __str__(self):
+        return self.name
+
 
 
 class Student(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     full_name = models.CharField(max_length=255, blank=True, null=True)
     date_of_birth = models.DateField()
-    student_class = models.CharField(max_length=10)  # Example: "Grade 1", "Class 6"
+    student_class = models.ForeignKey(StudentClass, on_delete=models.CASCADE)  # Link to StudentClass
     address = models.TextField(blank=True)
 
     def __str__(self):
-        return f"{self.full_name} - {self.student_class}"
+        return f"{self.full_name} - {self.student_class.name}"
+
 
 
 class Teacher(models.Model):
@@ -105,3 +114,23 @@ class Parent(models.Model):
 
     def __str__(self):
         return self.full_name
+    
+
+
+class Subject(models.Model):
+    name = models.CharField(max_length=200)
+
+    def __str__(self):
+        return self.name
+
+class Timetable(models.Model):
+    teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE)
+    subject = models.ForeignKey(Subject, on_delete=models.CASCADE)
+    day_of_week = models.CharField(max_length=20)
+    start_time = models.TimeField()
+    end_time = models.TimeField()
+    room = models.CharField(max_length=100)
+    student_class = models.ForeignKey(StudentClass, on_delete=models.CASCADE)  # ForeignKey to StudentClass
+
+    def __str__(self):
+        return f"{self.subject.name} by {self.teacher.full_name} for {self.student_class.name} on {self.day_of_week} from {self.start_time} to {self.end_time}"
