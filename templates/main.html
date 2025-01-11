@@ -365,14 +365,17 @@
                 </a>
                 <ul class="nav nav-treeview">
                   <li class="nav-item">
-                    <a href="pages/layout/top-nav.html" class="nav-link">
+                    <a
+                      href="{% url 'subject_content' subject_name='mathematics' %}"
+                      class="nav-link"
+                    >
                       <i class="far fa-circle nav-icon"></i>
                       <p>Mathematics</p>
                     </a>
                   </li>
                   <li class="nav-item">
                     <a
-                      href="pages/layout/top-nav-sidebar.html"
+                      href="{% url 'subject_content' subject_name='english language' %}"
                       class="nav-link"
                     >
                       <i class="far fa-circle nav-icon"></i>
@@ -380,33 +383,45 @@
                     </a>
                   </li>
                   <li class="nav-item">
-                    <a href="pages/layout/boxed.html" class="nav-link">
+                    <a
+                      href="{% url 'subject_content' subject_name='civic education' %}"
+                      class="nav-link"
+                    >
                       <i class="far fa-circle nav-icon"></i>
                       <p>Civic Education</p>
                     </a>
                   </li>
                   <li class="nav-item">
-                    <a href="pages/layout/fixed-sidebar.html" class="nav-link">
+                    <a
+                      href="{% url 'subject_content' subject_name='computer science' %}"
+                      class="nav-link"
+                    >
                       <i class="far fa-circle nav-icon"></i>
                       <p>Computer Science</p>
                     </a>
                   </li>
 
                   <li class="nav-item">
-                    <a href="pages/layout/fixed-topnav.html" class="nav-link">
+                    <a
+                      href="{% url 'subject_content' subject_name='c.r.k' %}"
+                      class="nav-link"
+                    >
                       <i class="far fa-circle nav-icon"></i>
                       <p>C.R.K</p>
                     </a>
                   </li>
                   <li class="nav-item">
-                    <a href="pages/layout/fixed-footer.html" class="nav-link">
+                    <a
+                      href="{% url 'subject_content' subject_name='p.h.e' %}"
+                      class="nav-link"
+                    >
                       <i class="far fa-circle nav-icon"></i>
                       <p>P.H.E</p>
                     </a>
                   </li>
                   <li class="nav-item">
                     <a
-                      href="pages/layout/collapsed-sidebar.html"
+                      href="{% url 'subject_content' subject_name='home economics' %}"
                       class="nav-link"
                     >
                       <i class="far fa-circle nav-icon"></i>
@@ -425,13 +440,13 @@
                 </a>
                 <ul class="nav nav-treeview">
                   <li class="nav-item">
-                    <a href="pages/charts/chartjs.html" class="nav-link">
+                    <a href="" class="nav-link">
                       <i class="far fa-circle nav-icon"></i>
                       <p>Upcoming Homeworks</p>
                     </a>
                   </li>
                   <li class="nav-item">
-                    <a href="pages/charts/flot.html" class="nav-link">
+                    <a href="" class="nav-link">
                       <i class="far fa-circle nav-icon"></i>
                       <p>Completed Homeworks</p>
                     </a>

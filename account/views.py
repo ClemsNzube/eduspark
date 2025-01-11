@@ -2,12 +2,13 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.forms import PasswordResetForm
-from .forms import LoginForm
+from .forms import ContentForm, LoginForm
+from django.utils.timezone import localtime
 from django.contrib.auth.decorators import login_required
 from .forms import ProfileForm
 from django.contrib import messages
 from .forms import UserSignUpForm, StudentSignUpForm, TeacherSignUpForm, ParentSignUpForm
-from .models import User, Student, Teacher, Parent, Timetable, StudentClass
+from .models import User, Student, Teacher, Parent, Timetable, StudentClass, Task
 
 # Sign up view for User (Student, Teacher, Parent)
 def user_signup(request):
@@ -203,3 +204,57 @@ def timetable_view(request):
         timetables = Timetable.objects.all().order_by('day_of_week', 'start_time')
     
     return render(request, 'teachers-index.html', {'timetables': timetables})
+
+
+def student_timetable_view(request):
+    if request.user.is_authenticated and request.user.role == 'student':
+        student = Student.objects.get(user=request.user)
+        today = localtime().strftime('%A')  # Get the current day of the week (e.g., "Monday")
+        
+        # Filter timetables for the student's class and today's day
+        timetables = Timetable.objects.filter(
+            student_class=student.student_class, day_of_week=today
+        ).order_by('start_time')
+    else:
+        timetables = None  # No timetables if the user isn't a student
+
+    return render(request, 'student_timetable.html', {'timetables': timetables})
+
+
+@login_required
+def mark_task_complete(request, task_id):
+    try:
+        task = Task.objects.get(id=task_id, user=request.user)
+        task.completed = True
+        task.save()
+    except Task.DoesNotExist:
+        pass
+    return redirect('student_dashboard')
+
+
+@login_required
+def upload_content(request):
+    user = request.user
+    try:
+        # Assuming a one-to-one relationship between user and teacher
+        teacher_profile = user.teacher
+        full_name = teacher_profile.full_name  # Retrieve full name from teacher profile
+    except Teacher.DoesNotExist:
+        teacher_profile = None
+        full_name = "Teacher profile not found"
+
+    if request.method == 'POST':
+        form = ContentForm(request.POST, request.FILES)
+        if form.is_valid():
+            content = form.save(commit=False)  # Prevent saving to the database immediately
+            content.teacher = teacher_profile  # Associate the content with the teacher
+            content.save()
+            return redirect('subject_content', subject_name=content.subject.name)  # Redirect to a success page or subject content
+    else:
+        form = ContentForm()
+    
+    return render(request, 'upload_content.html', {
+        'form': form,
+        'user': user,
+        'full_name': full_name,
+    })

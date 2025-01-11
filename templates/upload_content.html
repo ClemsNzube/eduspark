@@ -1,0 +1,86 @@
+{% extends 'main.html' %} {% load static %} {% block content %}
+<div class="content-wrapper" style="min-height: 167px">
+  <section class="content-header">
+    <div class="container-fluid">
+      <div class="row mb-2">
+        <div class="col-sm-6">
+          <h1>Upload Content</h1>
+        </div>
+        <div class="col-sm-6">
+          <ol class="breadcrumb float-sm-right">
+            <li class="breadcrumb-item"><a href="/user">Home</a></li>
+            <li class="breadcrumb-item active">Upload Content</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="content">
+    <div class="container-fluid">
+      {% if messages %}
+      <div class="container mt-3">
+        {% for message in messages %}
+        <div
+          class="alert alert-{{ message.tags }} text-center alert-dismissible fade show"
+          role="alert"
+        >
+          {{ message }}
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="alert"
+            aria-label="Close"
+          ></button>
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      <div class="card card-primary card-outline">
+        <div class="card-header">
+          <h3 class="card-title">Upload New Content</h3>
+        </div>
+        <div class="card-body">
+          <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <div class="mb-3">
+              <label for="id_subject" class="form-label">Subject</label>
+              {{ form.subject }}
+            </div>
+
+            <div class="mb-3">
+              <label for="id_content_type" class="form-label"
+                >Content Type</label
+              >
+              {{ form.content_type }}
+            </div>
+
+            <div class="mb-3">
+              <label for="id_title" class="form-label">Title</label>
+              {{ form.title }}
+            </div>
+
+            <div class="mb-3">
+              <label for="id_description" class="form-label">Description</label>
+              {{ form.description }}
+            </div>
+
+            <div class="mb-3">
+              <label for="id_content_file" class="form-label"
+                >Content File</label
+              >
+              {{ form.content_file }}
+            </div>
+
+            <button type="submit" class="btn btn-success">
+              Upload Content
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+{% endblock %}

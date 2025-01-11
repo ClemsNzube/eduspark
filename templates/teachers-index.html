@@ -6,7 +6,7 @@
     <div class="container-fluid">
       <div class="row mb-2">
         <div class="col-sm-6">
-          <h1 class="m-0">Welcome Back</h1>
+          <h1 class="m-0">Welcome Back {{ full_name }}</h1>
         </div>
         <!-- /.col -->
         <div class="col-sm-6">
@@ -32,16 +32,14 @@
           <!-- small box -->
           <div class="small-box bg-info">
             <div class="inner">
-              <h3>150</h3>
+              <h3>3rd</h3>
 
-              <p>New Orders</p>
+              <p>Term</p>
             </div>
             <div class="icon">
-              <i class="ion ion-bag"></i>
+              <i class="ion ion-stats-chart"></i>
             </div>
-            <a href="#" class="small-box-footer"
-              >More info <i class="fas fa-arrow-circle-right"></i
-            ></a>
+            <a href="#" class="small-box-footer">More info </a>
           </div>
         </div>
         <!-- ./col -->
@@ -49,16 +47,18 @@
           <!-- small box -->
           <div class="small-box bg-success">
             <div class="inner">
-              <h3>53<sup style="font-size: 20px">%</sup></h3>
+              <a href="{% url "upload_content" %}">
+                <h3 style="align: center; padding-left: 40%">+</h3>
 
-              <p>Bounce Rate</p>
+                <p style="align: center; padding-left: 22%">
+                  Upload Content
+                </p></a
+              >
             </div>
             <div class="icon">
-              <i class="ion ion-stats-bars"></i>
+              <i class="ion ion-stats"></i>
             </div>
-            <a href="#" class="small-box-footer"
-              >More info <i class="fas fa-arrow-circle-right"></i
-            ></a>
+            <a href="#" class="small-box-footer"></a>
           </div>
         </div>
 
@@ -85,7 +85,6 @@
                     <th>Day</th>
                     <th>Time</th>
                     <th>Subject</th>
-                    <th>Teacher</th>
                     <th>Room</th>
                   </tr>
                 </thead>
@@ -94,11 +93,9 @@
                   <tr>
                     <td>{{ timetable.day_of_week }}</td>
                     <td>
-                      {{ timetable.start_time|date:"g:i A" }} - {{
-                      timetable.end_time|date:"g:i A" }}
+                      {{ timetable.start_time }} - {{ timetable.end_time }}
                     </td>
                     <td>{{ timetable.subject.name }}</td>
-                    <td>{{ timetable.teacher.full_name }}</td>
                     <td>{{ timetable.room }}</td>
                   </tr>
                   {% empty %}

@@ -1,6 +1,7 @@
 from django.contrib.auth.models import AbstractUser, BaseUserManager, Group, Permission
 from django.db import models
 from django.contrib.auth.models import User
+from ckeditor.fields import RichTextField
 
 
 class CustomUserManager(BaseUserManager):
@@ -134,3 +135,27 @@ class Timetable(models.Model):
 
     def __str__(self):
         return f"{self.subject.name} by {self.teacher.full_name} for {self.student_class.name} on {self.day_of_week} from {self.start_time} to {self.end_time}"
+
+
+
+class Task(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    name = models.CharField(max_length=255)
+    completed = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.name
+    
+
+class Content(models.Model):
+    subject = models.ForeignKey(Subject, on_delete=models.CASCADE)
+    teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE)
+    content_type = models.CharField(max_length=50, choices=[('lecture', 'Lecture'), ('assignment', 'Assignment'), ('note', 'Note')])
+    title = models.CharField(max_length=255)
+    description = RichTextField()
+    content_file = models.FileField(upload_to='uploads/', blank=True, null=True)
+    date_uploaded = models.DateField(auto_now_add=True)
+    
+    def __str__(self):
+        return f"{self.title} ({self.date_uploaded})"

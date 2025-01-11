@@ -10,4 +10,5 @@ urlpatterns = [
     path('grade/', views.grade, name='grade'),
     path('attendance/', views.attendance, name='attendance'),
     path('report/', views.report, name='report'),
+    path('subject/<str:subject_name>/', views.subject_content, name='subject_content'),
 ]

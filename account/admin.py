@@ -1,6 +1,8 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
-from .models import User, StudentClass, Student, Teacher, Parent, Subject, Timetable
+from ckeditor.widgets import CKEditorWidget
+from django import forms
+from .models import *
 
 
 class UserAdmin(BaseUserAdmin):
@@ -63,3 +65,32 @@ class TimetableAdmin(admin.ModelAdmin):
 
 # Register the custom user admin
 admin.site.register(User, UserAdmin)
+
+
+class TaskAdmin(admin.ModelAdmin):
+    list_display = ('name', 'user', 'completed', 'created_at')  # Fields to display in the list view
+    list_filter = ('completed', 'created_at')  # Filters in the sidebar
+    search_fields = ('name', 'user__username')  # Fields for the search bar
+    ordering = ('-created_at',)  # Default ordering (newest tasks first)
+
+admin.site.register(Task, TaskAdmin)
+
+class ContentAdminForm(forms.ModelForm):
+    class Meta:
+        model = Content
+        fields = '__all__'
+        widgets = {
+            'description': CKEditorWidget(),  # Use CKEditor widget for the 'description' field
+        }
+
+class ContentAdmin(admin.ModelAdmin):
+    form = ContentAdminForm  # Attach the custom form
+    list_display = ('title', 'subject', 'teacher', 'content_type', 'date_uploaded')
+    list_filter = ('subject', 'content_type', 'teacher', 'date_uploaded')
+    search_fields = ('title', 'description', 'teacher__name', 'subject__name')
+    ordering = ('-date_uploaded',)
+    date_hierarchy = 'date_uploaded'
+
+
+# Register the Content model with the customized admin
+admin.site.register(Content, ContentAdmin)
