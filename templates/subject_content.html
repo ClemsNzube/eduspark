@@ -64,7 +64,7 @@
             {% for content in contents %}
             <li class="list-group-item">
               <h5>{{ content.title }}</h5>
-              <p>{{ content.description }}</p>
+              <p>{{ content.description|safe }}</p>
               {% if content.content_file %}
               <a
                 href="{{ content.content_file.url }}"

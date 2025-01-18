@@ -11,4 +11,8 @@ urlpatterns = [
     path('attendance/', views.attendance, name='attendance'),
     path('report/', views.report, name='report'),
     path('subject/<str:subject_name>/', views.subject_content, name='subject_content'),
+    path('upcoming-homework/', views.upcoming_homework, name='upcoming_homework'),
+    # path('submit-answer/<int:assignment_id>/', views.submit_answer, name='submit_answer'),
+    path('completed_assignments/', views.completed_assignments, name='completed_assignments'),
+    path('submitted_assignments/', views.submitted_assignments, name='submitted_assignments'),    
 ]

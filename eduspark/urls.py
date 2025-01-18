@@ -24,6 +24,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('accounts/', include('account.urls')),
     path('', include('website.urls')),
+    path('grades/', include('grades.urls')),
 ]
 
 # Add this to serve media files during development

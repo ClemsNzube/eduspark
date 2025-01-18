@@ -93,6 +93,8 @@
         padding-left: 200px;
       }
     </style>
+
+
   </head>
   <body class="hold-transition sidebar-mini layout-fixed">
     <div class="wrapper">
@@ -344,7 +346,7 @@
                 <ul class="nav nav-treeview">
                   <li class="nav-item">
                     <a
-                      href="{% url 'student_dashboard' %}"
+                      href="{% if user.teacher %}{% url 'teacher_dashboard' %}{% elif user.student %}{% url 'student_dashboard' %}{% elif user.parent %}{% url 'parent_dashboard' %}{% else %}{% url 'default_dashboard' %}{% endif %}"
                       class="nav-link active"
                     >
                       <i class="far fa-circle nav-icon"></i>
@@ -352,6 +354,7 @@
                     </a>
                   </li>
                 </ul>
+                
               </li>
 
               <li class="nav-item">
@@ -440,19 +443,29 @@
                 </a>
                 <ul class="nav nav-treeview">
                   <li class="nav-item">
-                    <a href="" class="nav-link">
+                    <a href="{% url 'upcoming_homework' %}" class="nav-link">
                       <i class="far fa-circle nav-icon"></i>
                       <p>Upcoming Homeworks</p>
                     </a>
                   </li>
+                  {% if user.student %}
                   <li class="nav-item">
-                    <a href="" class="nav-link">
+                    <a href="{% url 'completed_assignments' %}" class="nav-link">
                       <i class="far fa-circle nav-icon"></i>
                       <p>Completed Homeworks</p>
                     </a>
                   </li>
+                  {% elif user.teacher %}
+                  <li class="nav-item">
+                    <a href="{% url 'submitted_assignments' %}" class="nav-link">
+                        <i class="far fa-circle nav-icon"></i>
+                        <p>Submitted Assignments</p>
+                    </a>
+                </li>
+                  {% endif %}
                 </ul>
               </li>
+              
               <li class="nav-item">
                 <a href="" class="nav-link">
                   <i class="nav-icon fas fa-tree"></i>
@@ -463,7 +476,7 @@
                 </a>
                 <ul class="nav nav-treeview">
                   <li class="nav-item">
-                    <a href="{% url 'grade' %}" class="nav-link">
+                    <a href="{% url 'student_performance' %}" class="nav-link">
                       <i class="far fa-circle nav-icon"></i>
                       <p>Grades</p>
                     </a>
@@ -517,6 +530,7 @@
       {% block content %}
       <!-- The content of specific pages will be inserted here -->
       {% endblock %}
+      {% block extra_js %}{% endblock %}
 
       <footer class="main-footer">
         <strong>Copyright &copy; 2025 <a href="">EduSpark</a>.</strong>

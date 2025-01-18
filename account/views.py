@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.forms import PasswordResetForm
@@ -8,7 +8,7 @@ from django.contrib.auth.decorators import login_required
 from .forms import ProfileForm
 from django.contrib import messages
 from .forms import UserSignUpForm, StudentSignUpForm, TeacherSignUpForm, ParentSignUpForm
-from .models import User, Student, Teacher, Parent, Timetable, StudentClass, Task
+from .models import Content, User, Student, Teacher, Parent, Timetable, StudentClass, Task, Submission
 
 # Sign up view for User (Student, Teacher, Parent)
 def user_signup(request):
@@ -248,13 +248,49 @@ def upload_content(request):
         if form.is_valid():
             content = form.save(commit=False)  # Prevent saving to the database immediately
             content.teacher = teacher_profile  # Associate the content with the teacher
-            content.save()
-            return redirect('subject_content', subject_name=content.subject.name)  # Redirect to a success page or subject content
+
+            # If the content is an assignment, do not associate it with a subject and instead direct it to upcoming homework
+            if content.content_type == 'assignment':
+                content.subject = None  # Clear the subject field for assignments
+                content.save()
+                # Redirect to the upcoming homework page after saving the assignment
+                return redirect('upcoming_homework')  # Redirect to the upcoming homework page
+            else:
+                # For other content types, associate with the subject
+                content.save()
+                # Redirect to the subject content page
+                return redirect('subject_content', subject_name=content.subject.name)
+
     else:
         form = ContentForm()
-    
+
     return render(request, 'upload_content.html', {
         'form': form,
         'user': user,
         'full_name': full_name,
     })
+
+
+@login_required
+def submit_answer(request, content_id):
+    # Get the assignment content
+    content = get_object_or_404(Content, id=content_id, content_type='assignment')
+    
+    # Check if the user is a student
+    if request.method == 'POST':
+        student = Student.objects.get(user=request.user)   # Get the Student instance associated with the logged-in user
+
+        # Get the answer from the form submission
+        answer = request.POST.get('answer')
+
+        # Create a Submission object to store the student's answer
+        submission = Submission.objects.create(
+            content=content,
+            student=student,  # Assign the correct Student instance
+            answer=answer
+        )
+
+        # Redirect to the "Completed Assignments" page for students
+        return redirect('completed_assignments')
+
+    return redirect('upcoming_homework')  # Default redirect if no form submission

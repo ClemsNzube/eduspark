@@ -1,8 +1,9 @@
 from datetime import date
-from django.shortcuts import render, redirect
+from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth.decorators import login_required
-from account.models import User, Student, Teacher, Parent, Timetable, Task , Subject, Content
+from account.models import Submission, User, Student, Teacher, Parent, Timetable, Task , Subject, Content
 from django.utils.timezone import localtime
+from account.forms import SubmissionFeedbackForm
 
 
 
@@ -228,7 +229,8 @@ def subject_content(request, subject_name):
 
     # Get the content for today's date
     today = date.today()
-    contents = Content.objects.filter(subject=subject, date_uploaded=today)
+    # contents = Content.objects.filter(subject=subject, date_uploaded=today)
+    contents = Content.objects.filter(subject=subject, content_type__in=['lecture', 'note'], date_uploaded=today)
 
     # Get the logged-in user
     user = request.user
@@ -266,3 +268,137 @@ def subject_content(request, subject_name):
         'profile_type': profile_type,
         'is_teacher': is_teacher,  # Pass this to the template
     })
+
+
+@login_required
+def upcoming_homework(request):
+    # Get the logged-in user
+    user = request.user
+
+    # Check if the user is a teacher or a student
+    is_teacher = False
+    profile = None
+    full_name = "Profile not found"
+    profile_type = "unknown"
+
+    try:
+        # Check if the user has a teacher profile
+        teacher_profile = user.teacher  # Assumes a one-to-one relationship between user and teacher
+        profile = teacher_profile  # Use the teacher profile
+        full_name = teacher_profile.full_name
+        profile_type = "teacher"
+        is_teacher = True
+    except Teacher.DoesNotExist:
+        teacher_profile = None
+
+        # Check if the user has a student profile
+        try:
+            student_profile = user.student  # Assumes a one-to-one relationship between user and student
+            profile = student_profile  # Use the student profile
+            full_name = student_profile.full_name
+            profile_type = "student"
+        except Student.DoesNotExist:
+            student_profile = None
+
+    # Get today's date
+    today = date.today()
+
+    # Filter content for 'assignment' type, regardless of subject, for today
+    assignments = Content.objects.filter(
+        content_type='assignment',
+        date_uploaded=today
+    ).order_by('date_uploaded')
+
+    # Render the template with the filtered assignments
+    return render(request, 'upcoming_homework.html', {
+        'assignments': assignments,
+        'today': today,
+        'user': user,
+        'full_name': full_name,
+        'profile': profile,
+        'profile_type': profile_type,
+        'is_teacher': is_teacher,  # Pass this to the template
+    })
+
+
+
+# @login_required
+# def submit_answer(request, assignment_id):
+#     # Get the assignment based on the ID
+#     assignment = Content.objects.get(id=assignment_id)
+
+#     if request.method == 'POST':
+#         # Get the answer from the form
+#         answer = request.POST.get('answer')
+        
+#         # Save the answer (you can associate this with a student model if necessary)
+#         # For example, if you have a model for storing student answers:
+#         # Answer.objects.create(student=request.user.student, assignment=assignment, answer_text=answer)
+
+#         # You can store the answer here or perform any necessary logic
+
+#         # messages.success(request, 'Your answer has been submitted successfully!')
+#         return redirect('upcoming_homework')
+    
+
+@login_required
+def submitted_assignments(request):
+    if not hasattr(request.user, 'teacher'):
+        return redirect('home')  # Ensure only teachers can access this page
+
+    # Get all submissions grouped by the assignment
+    submissions = Submission.objects.select_related('content', 'student').all()
+
+    # Group submissions by assignment
+    grouped_submissions = {}
+    for submission in submissions:
+        if submission.content not in grouped_submissions:
+            grouped_submissions[submission.content] = []
+        grouped_submissions[submission.content].append(submission)
+
+    # Handle feedback form submission
+    if request.method == 'POST':
+        # Process each submission's feedback and status change
+        for submission in submissions:
+            feedback = request.POST.get(f'feedback_{submission.id}')
+            status = request.POST.get(f'status_{submission.id}')
+            
+            if feedback or status:
+                # Update the submission with new feedback and status
+                submission.feedback = feedback
+                submission.status = status
+                submission.save()
+
+        return redirect('submitted_assignments')  # Redirect to the same page to show updates
+
+    return render(request, 'submitted_assignments.html', {
+        'grouped_submissions': grouped_submissions,
+    })
+
+
+@login_required
+def completed_assignments(request):
+    user = request.user
+
+    # Check if the user has a student profile (assuming a one-to-one relationship between user and student)
+    try:
+        student_profile = user.student  # Assuming the User model has a related Student profile
+        full_name = student_profile.full_name
+        profile_type = "student"
+    except Student.DoesNotExist:
+        student_profile = None
+        full_name = "Student profile not found"
+        profile_type = "unknown"
+
+    # Get all completed assignments for the student
+    if student_profile:
+        completed_submissions = Submission.objects.filter(student=student_profile).order_by('-date_submitted')
+    else:
+        completed_submissions = []
+
+    return render(request, 'completed_assignments.html', {
+        'completed_submissions': completed_submissions,
+        'full_name': full_name,
+        'profile_type': profile_type,
+    })
+

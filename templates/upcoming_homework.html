@@ -1,0 +1,119 @@
+{% extends 'main.html' %}
+{% load static %}
+{% block content %}
+
+<style>
+  .card:hover {
+    transform: scale(1.05);
+    transition: transform 0.3s ease;
+  }
+
+  .card .icon i {
+    color: #28a745; /* Icon color for the success button */
+  }
+</style>
+
+<div class="content-wrapper" style="min-height: 167px">
+  <section class="content-header">
+    <div class="container-fluid">
+      <div class="row mb-2">
+        <div class="col-sm-6">
+          <h1>Upcoming Homework for {{ today }}</h1>
+        </div>
+        <div class="col-sm-6">
+          <ol class="breadcrumb float-sm-right">
+            <li class="breadcrumb-item"><a href="/user">Home</a></li>
+            <li class="breadcrumb-item active">Upcoming Homework</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="content">
+    <div class="container-fluid">
+      {% if messages %}
+      <div class="container mt-3">
+        {% for message in messages %}
+        <div
+          class="alert alert-{{ message.tags }} text-center alert-dismissible fade show"
+          role="alert"
+        >
+          {{ message }}
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="alert"
+            aria-label="Close"
+          ></button>
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      <div class="card card-primary card-outline">
+        <div class="card-header">
+          <h3 class="card-title">Upcoming Homework</h3>
+          {% if full_name %}
+          <small class="text-muted float-right">Welcome, {{ full_name }}</small>
+          {% endif %}
+        </div>
+        <div class="card-body">
+          {% if assignments %}
+          <ul class="list-group">
+            {% for assignment in assignments %}
+            <li class="list-group-item">
+              <h5>{{ assignment.title }}</h5>
+              <p>{{ assignment.description|safe }}</p>
+
+              <!-- Display the deadline -->
+              <p><strong>Deadline: Next 24 hours</strong> {{ assignment.deadline }}</p>
+
+              {% if assignment.content_file %}
+              <a href="{{ assignment.content_file.url }}" class="btn btn-primary btn-sm">
+                Download File
+              </a>
+              {% endif %}
+              <small class="text-muted d-block mt-2">
+                Uploaded by {{ assignment.teacher.full_name }} on {{ assignment.date_uploaded }}
+              </small>
+
+              <!-- Answer submission form -->
+              <form method="POST" action="{% url 'submit_answer' assignment.id %}">
+                {% csrf_token %}
+                <div class="form-group mt-3">
+                  <label for="answer">Your Answer</label>
+                  <textarea id="answer" name="answer" class="form-control" rows="4" placeholder="Write your answer here..."></textarea>
+                </div>
+                <button type="submit" class="btn btn-success mt-2">Submit Answer</button>
+              </form>
+            </li>
+            {% endfor %}
+          </ul>
+          {% else %}
+          <p class="text-center text-muted">No assignments uploaded for today.</p>
+          {% if is_teacher %}
+          <div class="row justify-content-center">
+            <div class="col-lg-3 col-md-4 col-6">
+              <div class="card shadow-sm">
+                <div class="card-body text-center p-4">
+                  <a href="{% url 'upload_content' %}" class="text-decoration-none text-dark">
+                    <div class="icon mb-3">
+                      <i class="fas fa-upload fa-3x"></i>
+                    </div>
+                    <h4 class="card-title mb-2">Upload Content</h4>
+                    <p class="card-text">Add new content for the subject</p>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+          {% endif %}
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+{% endblock %}

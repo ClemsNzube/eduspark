@@ -1,213 +1,104 @@
-{% extends 'main.html' %} {% load static %} {% block content %}
-<style>
-  /* Add the CSS here */
-  .grade-performance {
-    background-color: #f9f9f9;
-    padding: 20px;
-    border-radius: 8px;
-    width: 60%;
-    margin: 0 auto;
-    font-family: Arial, sans-serif;
-  }
+{% extends 'main.html' %}
+{% load static %}
 
-  .grade-performance h2 {
-    text-align: center;
-    color: #333;
-  }
-
-  .overall-grade,
-  .subject-grades,
-  .recent-results,
-  .teacher-feedback {
-    margin-bottom: 20px;
-  }
-
-  .grade-performance .progress-bar {
-    background-color: #ddd;
-    border-radius: 5px;
-    height: 20px;
-    width: 100%;
-    margin-top: 10px;
-  }
-
-  .grade-performance .progress {
-    background-color: #4caf50;
-    height: 100%;
-    border-radius: 5px;
-  }
-
-  .grade-performance .grade {
-    font-weight: bold;
-    font-size: 1.2em;
-  }
-
-  .subject-grades ul {
-    list-style: none;
-    padding: 0;
-  }
-
-  .subject-grades li {
-    margin: 5px 0;
-  }
-
-  .recent-results ul {
-    list-style: none;
-    padding: 0;
-  }
-
-  .recent-results li {
-    margin: 10px 0;
-  }
-
-  .feedback {
-    font-size: 1.2em;
-  }
-
-  .feedback.positive {
-    color: green;
-  }
-
-  .feedback.neutral {
-    color: orange;
-  }
-
-  .teacher-feedback p {
-    font-style: italic;
-    background-color: #f0f0f0;
-    padding: 10px;
-    border-left: 5px solid #4caf50;
-  }
-
-  /* Style for the chart */
-  .chart-container {
-    width: 100%;
-    height: 300px;
-    margin: 20px 0;
-  }
-</style>
-<!-- Include Chart.js library -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-<!-- Content Wrapper. Contains page content -->
-<div class="content-wrapper">
-  <!-- Content Header (Page header) -->
-  <div class="content-header">
+{% block content %}
+<div class="content-wrapper" style="min-height: 167px">
+  <section class="content-header">
     <div class="container-fluid">
       <div class="row mb-2">
         <div class="col-sm-6">
-          <h1 class="m-0">Welcome Back</h1>
+          <h1>Student Performance</h1>
         </div>
-        <!-- /.col -->
         <div class="col-sm-6">
           <ol class="breadcrumb float-sm-right">
-            <li class="breadcrumb-item"><a href="#">Home</a></li>
-            <li class="breadcrumb-item active">Dashboard v1</li>
+            <li class="breadcrumb-item"><a href="/user">Home</a></li>
+            <li class="breadcrumb-item active">Performance</li>
           </ol>
         </div>
-        <!-- /.col -->
-      </div>
-      <!-- /.row -->
-    </div>
-    <!-- /.container-fluid -->
-  </div>
-
-  <section class="grade-performance">
-    <div class="container">
-      <h2>Student Performance Overview</h2>
-
-      <!-- Overall Grade -->
-      <div class="overall-grade">
-        <h3>Total Grade: <span class="grade">B</span></h3>
-        <div class="progress-bar">
-          <div class="progress" style="width: 80%"></div>
-        </div>
-      </div>
-
-      <!-- Subject Grades -->
-      <div class="subject-grades">
-        <h3>Grades by Subject:</h3>
-        <ul>
-          <li>Math: <span class="grade">A</span></li>
-          <li>English: <span class="grade">B</span></li>
-          <li>Science: <span class="grade">C</span></li>
-          <li>Art: <span class="grade">A</span></li>
-        </ul>
-      </div>
-
-      <!-- Recent Results -->
-      <div class="recent-results">
-        <h3>Recent Test Results:</h3>
-        <ul>
-          <li>Math Test: 85% <span class="feedback positive">😊</span></li>
-          <li>English Writing: 75% <span class="feedback neutral">😐</span></li>
-        </ul>
-      </div>
-
-      <!-- Teacher's Feedback -->
-      <div class="teacher-feedback">
-        <h3>Teacher's Feedback:</h3>
-        <p>
-          "Great effort in math this term! Keep practicing your reading skills."
-        </p>
-      </div>
-
-      <!-- Chart Section -->
-      <div class="chart-container">
-        <canvas id="performanceChart"></canvas>
       </div>
     </div>
   </section>
 
-  <!-- Script for Chart.js -->
-  <script>
-    // Data for the chart
-    const subjectData = {
-      labels: ["Math", "English", "Science", "Art"],
-      datasets: [
-        {
-          label: "Grades (%)",
-          data: [90, 75, 60, 95], // Dynamic data for grades
-          backgroundColor: ["#4CAF50", "#2196F3", "#FFEB3B", "#FFC107"],
-          borderColor: ["#388E3C", "#1976D2", "#FBC02D", "#FFA000"],
-          borderWidth: 1,
-        },
-      ],
-    };
-
-    // Configuration for the chart
-    const config = {
-      type: "bar", // Type of chart (bar chart)
-      data: subjectData,
-      options: {
-        responsive: true,
-        plugins: {
-          legend: {
-            position: "top",
-          },
-          tooltip: {
-            callbacks: {
-              label: function (tooltipItem) {
-                return tooltipItem.raw + "%"; // Add percentage to the tooltip label
-              },
-            },
-          },
-        },
-        scales: {
-          x: {
-            beginAtZero: true,
-          },
-          y: {
-            beginAtZero: true,
-            max: 100, // Set max to 100 to represent the percentage scale
-          },
-        },
-      },
-    };
-
-    // Render the chart
-    const ctx = document.getElementById("performanceChart").getContext("2d");
-    const performanceChart = new Chart(ctx, config);
-  </script>
+  <section class="content">
+    <div class="container-fluid">
+      <div class="card card-primary card-outline">
+        <div class="card-header">
+          <h3 class="card-title">Subject Grades</h3>
+        </div>
+        <div class="card-body">
+          {% if subject_grades %}
+            <ul>
+              {% for subject, grade in subject_grades.items %}
+                <li>
+                  <strong>{{ subject }}:</strong> 
+                  {{ grade }} - <strong>
+                    {% if grade >= 85 %}
+                      A
+                    {% elif grade >= 70 %}
+                      B
+                    {% elif grade >= 60 %}
+                      C
+                    {% elif grade >= 50 %}
+                      D
+                    {% elif grade >= 45 %}
+                      E
+                    {% else %}
+                      F
+                    {% endif %}
+                  </strong>
+                </li>
+              {% endfor %}
+            </ul>
+          {% else %}
+            <p>No grades found.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </section>
 </div>
 
-{% endblock content %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  var ctx = document.getElementById('performanceChart').getContext('2d');
+  var performanceChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: [
+        {% for subject in chart_data.subjects %}
+          "{{ subject }}"{% if not forloop.last %},{% endif %}
+        {% endfor %}
+      ],
+      datasets: [{
+        label: 'Performance by Subject',
+        data: [
+          {% for score in chart_data.scores %}
+            {{ score }}{% if not forloop.last %},{% endif %}
+          {% endfor %}
+        ],
+        backgroundColor: [
+          'rgba(75, 192, 192, 0.2)',
+          'rgba(153, 102, 255, 0.2)',
+          'rgba(255, 159, 64, 0.2)',
+          'rgba(54, 162, 235, 0.2)',
+        ],
+        borderColor: [
+          'rgba(75, 192, 192, 1)',
+          'rgba(153, 102, 255, 1)',
+          'rgba(255, 159, 64, 1)',
+          'rgba(54, 162, 235, 1)',
+        ],
+        borderWidth: 1
+      }]
+    },
+    options: {
+      scales: {
+        y: {
+          beginAtZero: true,
+          max: 100
+        }
+      }
+    }
+  });
+</script>
+{% endblock %}

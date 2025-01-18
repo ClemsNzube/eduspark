@@ -1,7 +1,7 @@
 from django.contrib.auth import authenticate
 from django import forms
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
-from .models import Content, User, Student, Teacher, Parent, StudentClass
+from .models import Content, User, Student, Teacher, Parent, StudentClass, Submission
 
 
 # User Registration Form
@@ -62,3 +62,11 @@ class ContentForm(forms.ModelForm):
     class Meta:
         model = Content
         fields = ['subject', 'content_type', 'title', 'description', 'content_file']
+
+class SubmissionFeedbackForm(forms.ModelForm):
+    class Meta:
+        model = Submission
+        fields = ['status', 'feedback']
+        widgets = {
+            'feedback': forms.Textarea(attrs={'rows': 3, 'placeholder': 'Leave feedback for the student here...'})
+        }

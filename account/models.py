@@ -149,7 +149,7 @@ class Task(models.Model):
     
 
 class Content(models.Model):
-    subject = models.ForeignKey(Subject, on_delete=models.CASCADE)
+    subject = models.ForeignKey(Subject, on_delete=models.CASCADE, null=True)
     teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE)
     content_type = models.CharField(max_length=50, choices=[('lecture', 'Lecture'), ('assignment', 'Assignment'), ('note', 'Note')])
     title = models.CharField(max_length=255)
@@ -159,3 +159,20 @@ class Content(models.Model):
     
     def __str__(self):
         return f"{self.title} ({self.date_uploaded})"
+    
+
+class Submission(models.Model):
+    content = models.ForeignKey(Content, on_delete=models.CASCADE, related_name='submissions')
+    student = models.ForeignKey(Student, on_delete=models.CASCADE)  # Assuming you are using Django's built-in User model for students
+    answer = models.TextField()
+    date_submitted = models.DateTimeField(auto_now_add=True)
+    status = models.CharField(
+        max_length=20, 
+        choices=[('correct', 'Correct'), ('incorrect', 'Incorrect'), ('pending', 'Pending')], 
+        default='pending'
+    )
+    feedback = models.TextField(blank=True, null=True)
+
+    def __str__(self):
+        return f"Submission by {self.student.full_name} for {self.content.title}"
+    

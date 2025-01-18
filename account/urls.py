@@ -8,4 +8,5 @@ urlpatterns = [
     path('profile/', views.profile_view, name='profile'),
     path('tasks/<int:task_id>/complete/', views.mark_task_complete, name='mark_task_complete'),
     path('upload/', views.upload_content, name='upload_content'),
+    path('submit_answer/<int:content_id>/', views.submit_answer, name='submit_answer'),
 ]

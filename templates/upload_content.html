@@ -1,4 +1,6 @@
-{% extends 'main.html' %} {% load static %} {% block content %}
+{% extends 'main.html' %}
+{% load static %}
+{% block content %}
 <div class="content-wrapper" style="min-height: 167px">
   <section class="content-header">
     <div class="container-fluid">
@@ -51,9 +53,7 @@
             </div>
 
             <div class="mb-3">
-              <label for="id_content_type" class="form-label"
-                >Content Type</label
-              >
+              <label for="id_content_type" class="form-label">Content Type</label>
               {{ form.content_type }}
             </div>
 
@@ -64,13 +64,11 @@
 
             <div class="mb-3">
               <label for="id_description" class="form-label">Description</label>
-              {{ form.description }}
+              <textarea id="id_description" name="description" rows="10" cols="30">{{ form.description.value }}</textarea>
             </div>
 
             <div class="mb-3">
-              <label for="id_content_file" class="form-label"
-                >Content File</label
-              >
+              <label for="id_content_file" class="form-label">Content File</label>
               {{ form.content_file }}
             </div>
 
@@ -83,4 +81,12 @@
     </div>
   </section>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.ckeditor.com/4.18.0/standard/ckeditor.js"></script>
+<script>
+    // Initialize CKEditor for the description field only
+    CKEDITOR.replace('id_description');
+</script>
 {% endblock %}

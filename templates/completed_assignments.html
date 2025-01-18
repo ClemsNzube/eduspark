@@ -1,0 +1,82 @@
+{% extends 'main.html' %}
+{% load static %}
+{% block content %}
+<div class="content-wrapper" style="min-height: 167px">
+  <section class="content-header">
+    <div class="container-fluid">
+      <div class="row mb-2">
+        <div class="col-sm-6">
+          <h1>Completed Assignments</h1>
+        </div>
+        <div class="col-sm-6">
+          <ol class="breadcrumb float-sm-right">
+            <li class="breadcrumb-item"><a href="/user">Home</a></li>
+            <li class="breadcrumb-item active">Completed Assignments</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="content">
+    <div class="container-fluid">
+      {% if messages %}
+      <div class="container mt-3">
+        {% for message in messages %}
+        <div
+          class="alert alert-{{ message.tags }} text-center alert-dismissible fade show"
+          role="alert"
+        >
+          {{ message }}
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="alert"
+            aria-label="Close"
+          ></button>
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      <div class="card card-primary card-outline">
+        <div class="card-header">
+          <h3 class="card-title">List of Completed Assignments</h3>
+        </div>
+        <div class="card-body">
+          {% if completed_submissions %}
+            {% for submission in completed_submissions %}
+              <div class="mb-4">
+                <h4>{{ submission.content.title }}</h4>
+                <p>{{ submission.answer }}</p>
+                <p><strong>Date Submitted:</strong> {{ submission.date_submitted|date:"F j, Y, g:i a" }}</p>
+
+                <!-- Display the Status -->
+                <p><strong>Status:</strong>
+                  {% if submission.status == 'correct' %}
+                    <span class="badge bg-success">Correct</span>
+                  {% elif submission.status == 'incorrect' %}
+                    <span class="badge bg-danger">Incorrect</span>
+                  {% else %}
+                    <span class="badge bg-warning">Pending</span>
+                  {% endif %}
+                </p>
+
+                <!-- Display Feedback -->
+                {% if submission.feedback %}
+                  <p><strong>Feedback:</strong> {{ submission.feedback }}</p>
+                {% else %}
+                  <p><strong>Feedback:</strong> No feedback provided yet.</p>
+                {% endif %}
+              </div>
+              <hr>
+            {% endfor %}
+          {% else %}
+            <p>No completed assignments found.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+{% endblock %}

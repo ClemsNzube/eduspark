@@ -94,3 +94,32 @@ class ContentAdmin(admin.ModelAdmin):
 
 # Register the Content model with the customized admin
 admin.site.register(Content, ContentAdmin)
+
+class SubmissionAdmin(admin.ModelAdmin):
+    list_display = ('student', 'content', 'date_submitted', 'status', 'feedback')
+    list_filter = ('status', 'date_submitted', 'content')
+    search_fields = ('student__full_name', 'content__title')
+    ordering = ('-date_submitted',)
+    
+    # Make 'status' and 'feedback' fields editable from the list view
+    list_editable = ('status', 'feedback')
+
+    # Customize the form view for submission editing
+    fieldsets = (
+        (None, {
+            'fields': ('student', 'content', 'answer', 'status', 'feedback')
+        }),
+        ('Date Information', {
+            'fields': ('date_submitted',),
+            'classes': ('collapse',)
+        }),
+    )
+    readonly_fields = ('date_submitted',)
+
+    # Show a count of the number of submissions per content
+    def get_queryset(self, request):
+        queryset = super().get_queryset(request)
+        return queryset.select_related('student', 'content')
+
+# Register the Submission model with the custom admin class
+admin.site.register(Submission, SubmissionAdmin)

@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'website',
     'ckeditor',
     'ckeditor_uploader',
+    'grades',
 ]
 
 MIDDLEWARE = [
