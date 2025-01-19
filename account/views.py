@@ -1,5 +1,6 @@
 from datetime import timedelta, timezone
 from django.shortcuts import get_object_or_404, render, redirect
+from django.http import JsonResponse
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.forms import PasswordResetForm
@@ -9,7 +10,9 @@ from django.contrib.auth.decorators import login_required
 from .forms import ProfileForm
 from django.contrib import messages
 from .forms import UserSignUpForm, StudentSignUpForm, TeacherSignUpForm, ParentSignUpForm
-from .models import Attendance, Content, Subject, User, Student, Teacher, Parent, Timetable, StudentClass, Task, Submission
+from .models import *
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 # Sign up view for User (Student, Teacher, Parent)
 def user_signup(request):
@@ -374,9 +377,11 @@ def student_attendance(request):
     """
     View for students to see their attendance for each subject.
     """
-    # Get the logged-in user's student profile
+    user = request.user
+
+    # Check if the user has a student profile (assuming a one-to-one relationship between user and student)
     try:
-        student_profile = request.user.student  # Assuming a one-to-one relationship between user and student
+        student_profile = user.student  # Assuming the User model has a related Student profile
         full_name = student_profile.full_name
         profile_type = "student"
     except Student.DoesNotExist:
@@ -384,15 +389,139 @@ def student_attendance(request):
         full_name = "Student profile not found"
         profile_type = "unknown"
 
-    # Fetch all the attendance records for the student, ordered by subject and assignment date
+    # Fetch all attendance records for the student, ordered by subject and assignment date
     if student_profile:
-        attendance_records = Attendance.objects.filter(student=student_profile).select_related('subject', 'content')
+        attendance_records = Attendance.objects.filter(student=student_profile).select_related('subject', 'content').order_by('-date')
     else:
         attendance_records = []
 
     return render(request, 'student_attendance.html', {
         'attendance_records': attendance_records,
-        'student': student_profile,
         'full_name': full_name,
         'profile_type': profile_type,
     })
+
+
+
+@login_required
+def calendar_view(request):
+    events = Event.objects.all().order_by('-start_time')
+
+    # Filter events based on user type (teacher or student)
+    if hasattr(request.user, 'teacher'):
+        events = events.filter(teacher=request.user)
+    elif hasattr(request.user, 'student'):
+        events = events.filter(is_general=True)  # Students can only see general events
+
+    return render(request, 'calendar.html', {'events': events})
+
+@login_required
+def create_event(request):
+    if request.method == 'POST':
+        title = request.POST.get('title')
+        description = request.POST.get('description')
+        start_time = request.POST.get('start_time')
+        end_time = request.POST.get('end_time')
+        is_general = request.POST.get('is_general', False)
+
+        # Create a new event
+        event = Event.objects.create(
+            title=title,
+            description=description,
+            start_time=start_time,
+            end_time=end_time,
+            is_general=is_general,
+            teacher=request.user if hasattr(request.user, 'teacher') else None,
+        )
+
+        return JsonResponse({'status': 'success', 'event_id': event.id})
+    
+
+import os
+
+@login_required
+def materials_view(request):
+    user = request.user
+
+    # Initialize variables for profile details
+    full_name = "Profile not found"
+    profile_type = "unknown"
+
+    # Retrieve the student's profile, if available
+    try:
+        student_profile = user.student  # Assuming a one-to-one relationship between User and Student
+        full_name = student_profile.full_name
+        profile_type = "student"
+    except Student.DoesNotExist:
+        student_profile = None
+
+    # Retrieve the teacher's profile, if available
+    try:
+        teacher_profile = user.teacher  # Assuming a one-to-one relationship between User and Teacher
+        full_name = teacher_profile.full_name
+        profile_type = "teacher"
+    except Teacher.DoesNotExist:
+        teacher_profile = None
+
+    # Handle material upload (only teachers are allowed)
+    if request.method == 'POST':
+        if profile_type != "teacher":
+            messages.error(request, 'You are not authorized to upload materials.')
+            return redirect('materials')
+
+        title = request.POST.get('title')
+        description = request.POST.get('description')
+        file = request.FILES.get('file')
+        if title and file:
+            material = Material.objects.create(
+                title=title,
+                description=description,
+                file=file,
+                uploaded_by=user
+            )
+            messages.success(request, 'Material uploaded successfully!')
+        else:
+            messages.error(request, 'All fields are required.')
+        return redirect('materials')
+
+    # Add file type to materials
+    materials = Material.objects.all()
+    for material in materials:
+        _, ext = os.path.splitext(material.file.name)  # Get file extension
+        ext = ext.lower()
+        if ext == '.pdf':
+            material.file_type = 'PDF Document'
+        elif ext == '.mp4':
+            material.file_type = 'Video'
+        elif ext == '.mp3':
+            material.file_type = 'Audio'
+        elif ext in ['.doc', '.docx']:
+            material.file_type = 'Word Document'
+        elif ext in ['.ppt', '.pptx']:
+            material.file_type = 'Presentation'
+        else:
+            material.file_type = 'Other'
+
+    return render(request, 'materials.html', {
+        'materials': materials,
+        'full_name': full_name,
+        'profile_type': profile_type,
+    })
+
+
+
+def student_report(request, report_id):
+    # Fetch the report, student, and school data based on the report_id
+    report = get_object_or_404(StudentReport, id=report_id)
+    student = report.student
+    school = School.objects.first()  # Assuming the school is a single instance
+
+    # Pass the context to the template
+    context = {
+        'report': report,
+        'student': student,
+        'school': school,
+    }
+
+    # Render the template with the context
+    return render(request, 'report.html', context)

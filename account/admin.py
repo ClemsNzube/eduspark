@@ -1,29 +1,47 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from ckeditor.widgets import CKEditorWidget
+from django.contrib.auth.admin import UserAdmin
+from django.utils.translation import gettext_lazy as _
+from .models import User
 from django import forms
 from django.utils.html import format_html
 from .models import *
 from grades.models import Grade  # Import Grade model from the grades app
 
 
-class UserAdmin(BaseUserAdmin):
-    # Customize fields in the admin
+class CustomUserAdmin(UserAdmin):
+    # Fields to display in the list view
+    list_display = ('email', 'fullname', 'role', 'is_teacher', 'is_staff', 'is_active')
+    list_filter = ('role', 'is_teacher', 'is_staff', 'is_active', 'groups')
+    search_fields = ('email', 'fullname', 'phone', 'role')
+    ordering = ('email',)
+
+    # Define fieldsets for the user detail/edit page
     fieldsets = (
         (None, {'fields': ('email', 'password')}),
-        ('Personal info', {'fields': ('fullname', 'phone', 'dob', 'address1', 'address2', 'city', 'state', 'country', 'postal_code', 'image', 'role')}),
-        ('Permissions', {'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions')}),
+        (_('Personal Info'), {
+            'fields': ('fullname', 'phone', 'dob', 'image', 'address1', 'address2', 'city', 'state', 'country', 'postal_code')
+        }),
+        (_('Roles and Permissions'), {
+            'fields': ('role', 'is_teacher', 'is_staff', 'is_superuser', 'groups', 'user_permissions')
+        }),
+        (_('Important Dates'), {'fields': ('last_login', 'date_joined')}),
     )
+
+    # Fields for the add user form in the admin
     add_fieldsets = (
         (None, {
             'classes': ('wide',),
-            'fields': ('email', 'password1', 'password2', 'role'),
+            'fields': ('email', 'role', 'password1', 'password2', 'is_teacher', 'is_staff', 'is_active'),
         }),
     )
-    list_display = ('email', 'fullname', 'role', 'is_active', 'is_staff')
-    search_fields = ('email', 'fullname', 'role')
-    ordering = ('email',)
 
+    # Which fields are editable inline
+    readonly_fields = ('last_login', 'date_joined')
+
+# Register the User model with the custom admin class
+admin.site.register(User, CustomUserAdmin)
 
 @admin.register(StudentClass)
 class StudentClassAdmin(admin.ModelAdmin):
@@ -72,7 +90,7 @@ class TimetableAdmin(admin.ModelAdmin):
 
 
 # Register the custom user admin
-admin.site.register(User, UserAdmin)
+# admin.site.register(User, UserAdmin)
 
 
 class TaskAdmin(admin.ModelAdmin):
@@ -182,3 +200,69 @@ class AttendanceAdmin(admin.ModelAdmin):
 
 # Register the Attendance model with the customized admin
 admin.site.register(Attendance, AttendanceAdmin)
+
+
+class EventAdmin(admin.ModelAdmin):
+    # Fields to display in the list view
+    list_display = ('title', 'teacher', 'start_time', 'end_time', 'is_general', 'created_at')
+    
+    # Fields to filter by in the sidebar
+    list_filter = ('is_general', 'start_time', 'end_time', 'teacher')
+    
+    # Fields to search by in the admin search bar
+    search_fields = ('title', 'description', 'teacher__username')
+    
+    # Fields to display and group in the edit form
+    fieldsets = (
+        ('Event Details', {
+            'fields': ('title', 'description', 'teacher', 'is_general')
+        }),
+        ('Date and Time', {
+            'fields': ('start_time', 'end_time')
+        }),
+        ('Metadata', {
+            'fields': ('created_at',),
+            'classes': ('collapse',),  # Collapse metadata section to keep the UI clean
+        }),
+    )
+    
+    # Automatically set 'created_at' to be read-only
+    readonly_fields = ('created_at',)
+
+admin.site.register(Event, EventAdmin)
+
+
+@admin.register(Material)
+class MaterialAdmin(admin.ModelAdmin):
+    list_display = ('title', 'uploaded_by', 'uploaded_at', 'file_type')
+    list_filter = ('uploaded_by', 'uploaded_at')
+    search_fields = ('title', 'description', 'uploaded_by__username')
+    date_hierarchy = 'uploaded_at'
+
+    def file_type(self, obj):
+        if obj.file.name.lower().endswith('.pdf'):
+            return 'PDF'
+        elif obj.file.name.lower().endswith('.mp4'):
+            return 'Video'
+        elif obj.file.name.lower().endswith('.mp3'):
+            return 'Audio'
+        return 'Other'
+
+    file_type.short_description = 'File Type'
+
+
+
+@admin.register(School)
+class SchoolAdmin(admin.ModelAdmin):
+    list_display = ('name', 'address', 'phone', 'email')
+    search_fields = ('name', 'email')
+
+
+
+
+
+@admin.register(StudentReport)
+class StudentReportAdmin(admin.ModelAdmin):
+    list_display = ('student', 'school', 'total_average', 'overall_grade', 'created_at', 'updated_at')
+    search_fields = ('student__fullname', 'school__name', 'overall_grade')
+    list_filter = ('overall_grade',)

@@ -16,6 +16,8 @@
       rel="stylesheet"
       href="{% static 'plugins/fontawesome-free/css/all.min.css' %}"
     />
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.5.1/main.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.5.1/main.min.js"></script>
     <!-- Ionicons -->
     <link
       rel="stylesheet"
@@ -102,13 +104,7 @@
       <div
         class="preloader flex-column justify-content-center align-items-center"
       >
-        <img
-          class="animation__shake"
-          src="{% static 'dist/img/AdminLTELogo.png' %}"
-          alt="AdminLTELogo"
-          height="60"
-          width="60"
-        />
+        <span>EduSpark</span>
       </div>
 
       <!-- Navbar -->
@@ -521,7 +517,7 @@
                 </a>
               </li>
               <li class="nav-item">
-                <a href="#" class="nav-link">
+                <a href="{% url 'materials' %}" class="nav-link">
                   <i class="nav-icon fas fa-table"></i>
                   <p>
                     Materials
@@ -531,7 +527,7 @@
               </li>
 
               <li class="nav-item">
-                <a href="{% url 'report' %}" class="nav-link">
+                <a href="" class="nav-link">
                   <i class="nav-icon far fa-image"></i>
                   <p>Report</p>
                 </a>

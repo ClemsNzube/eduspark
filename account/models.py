@@ -1,3 +1,4 @@
+from django.utils import timezone
 from django.contrib.auth.models import AbstractUser, BaseUserManager, Group, Permission
 from django.db import models
 from django.contrib.auth.models import User
@@ -53,6 +54,7 @@ class User(AbstractUser):
     country = models.CharField(max_length=100, blank=True, null=True)
     postal_code = models.CharField(max_length=20, blank=True, null=True)
     image = models.ImageField(upload_to='profile_pics/', blank=True, null=True)
+    is_teacher = models.BooleanField(default=False)
 
     # Override group and permissions fields to avoid conflicts
     groups = models.ManyToManyField(
@@ -215,3 +217,94 @@ class Attendance(models.Model):
 
     def __str__(self):
         return f"{self.student.full_name} - {self.subject.name} - {'Attended' if self.attended else 'Absent'}"
+    
+
+
+class Event(models.Model):
+    teacher = models.ForeignKey(User, on_delete=models.CASCADE, related_name="teacher_events", null=True, blank=True)
+    title = models.CharField(max_length=255)
+    description = models.TextField(blank=True)
+    start_time = models.DateTimeField()
+    end_time = models.DateTimeField()
+    is_general = models.BooleanField(default=False)  # Whether this is a general event visible to all students
+    created_at = models.DateTimeField(default=timezone.now)
+
+    def __str__(self):
+        return self.title
+    
+    
+class Material(models.Model):
+    title = models.CharField(max_length=255)
+    description = models.TextField(blank=True, null=True)
+    file = models.FileField(upload_to='materials/')
+    uploaded_by = models.ForeignKey(User, on_delete=models.CASCADE)
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.title
+    
+
+
+class School(models.Model):
+    name = models.CharField(max_length=255)
+    address = models.TextField()
+    phone = models.CharField(max_length=15)
+    email = models.EmailField()
+    logo = models.ImageField(upload_to='school_logos/', blank=True, null=True)
+
+    def __str__(self):
+        return self.name
+    
+class StudentReport(models.Model):
+    GRADE_CHOICES = [
+        ('Distinction', 'Distinction'),
+        ('Credit', 'Credit'),
+        ('Merit', 'Merit'),
+        ('Pass', 'Pass'),
+        ('Failure', 'Failure'),
+    ]
+
+    student = models.ForeignKey(Student, on_delete=models.CASCADE, limit_choices_to={'role': 'student'})
+    school = models.ForeignKey(School, on_delete=models.CASCADE)
+    total_average = models.DecimalField(max_digits=5, decimal_places=2, default=0.00)
+    overall_grade = models.CharField(max_length=20, choices=GRADE_CHOICES, default='Failure')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"Report for {self.student.full_name} - {self.school.name}"
+    
+class SubjectGrade(models.Model):
+    report = models.ForeignKey(StudentReport, on_delete=models.CASCADE, related_name='subject_grades')
+    subject = models.ForeignKey(Subject, on_delete=models.CASCADE)
+    grade = models.DecimalField(max_digits=5, decimal_places=2)  # e.g., 75.50 for a grade
+    attendance = models.PositiveIntegerField()  # e.g., 90 for 90% attendance
+
+    def __str__(self):
+        return f"{self.subject.name} - {self.report.student.fullname}"
+
+# Signal to calculate total average and grade
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+
+@receiver(post_save, sender=SubjectGrade)
+def calculate_report_average(sender, instance, **kwargs):
+    report = instance.report
+    grades = report.subject_grades.all()
+    total_grade = sum([grade.grade for grade in grades])
+    total_subjects = grades.count()
+    report.total_average = total_grade / total_subjects if total_subjects > 0 else 0.0
+
+    # Determine overall grade based on the average
+    if report.total_average >= 75:
+        report.overall_grade = 'Distinction'
+    elif report.total_average >= 65:
+        report.overall_grade = 'Credit'
+    elif report.total_average >= 50:
+        report.overall_grade = 'Merit'
+    elif report.total_average >= 40:
+        report.overall_grade = 'Pass'
+    else:
+        report.overall_grade = 'Failure'
+
+    report.save()

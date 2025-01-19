@@ -1,0 +1,146 @@
+{% extends 'main.html' %}
+{% load static %}
+{% block content %}
+<div class="content-wrapper" style="min-height: 167px">
+  <!-- Page Header -->
+  <section class="content-header">
+    <div class="container-fluid">
+      <div class="row mb-2">
+        <div class="col-sm-6">
+          <h1>Study Materials</h1>
+        </div>
+        <div class="col-sm-6">
+          <ol class="breadcrumb float-sm-right">
+            <li class="breadcrumb-item"><a href="/user">Home</a></li>
+            <li class="breadcrumb-item active">Materials</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Page Content -->
+  <section class="content">
+    <div class="container-fluid">
+      <!-- Alerts for Success or Error -->
+      {% if messages %}
+      <div class="container mt-3">
+        {% for message in messages %}
+        <div
+          class="alert alert-{{ message.tags }} text-center alert-dismissible fade show"
+          role="alert"
+        >
+          {{ message }}
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="alert"
+            aria-label="Close"
+          ></button>
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      <!-- Only Teachers Can See the Upload Form -->
+      {% if user.is_authenticated and user.is_teacher %}
+      <div class="card card-primary card-outline">
+        <div class="card-header">
+          <h3 class="card-title">Upload Material</h3>
+        </div>
+        <div class="card-body">
+          <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="form-group">
+              <label for="title">Material Title</label>
+              <input
+                type="text"
+                id="title"
+                name="title"
+                class="form-control"
+                placeholder="Enter the material title"
+                required
+              />
+            </div>
+            <div class="form-group">
+              <label for="description">Description</label>
+              <textarea
+                id="description"
+                name="description"
+                class="form-control"
+                rows="3"
+                placeholder="Enter a brief description of the material"
+              ></textarea>
+            </div>
+            <div class="form-group">
+              <label for="file">Upload Material</label>
+              <input
+                type="file"
+                id="file"
+                name="file"
+                class="form-control"
+                accept=".pdf,.mp4,.mp3,.doc,.docx,.ppt,.pptx"
+                required
+              />
+            </div>
+            <div class="form-group">
+              <button type="submit" class="btn btn-primary">
+                Upload Material
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- Card for Materials List -->
+      <div class="card card-primary card-outline mt-4">
+        <div class="card-header">
+          <h3 class="card-title">Available Materials</h3>
+        </div>
+        <div class="card-body">
+          <table class="table table-bordered">
+            <thead>
+              <tr>
+                <th>Title</th>
+                <th>Description</th>
+                <th>Type</th>
+                <th>Uploaded By</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for material in materials %}
+              <tr>
+                <td>{{ material.title }}</td>
+                <td>{{ material.description }}</td>
+                
+                <td>{{ material.file_type }}</td>
+
+              
+                <td>{{ material.uploaded_by }}</td>
+                <td>
+                  <a
+                    href="{{ material.file.url }}"
+                    class="btn btn-success btn-sm"
+                    target="_blank"
+                  >
+                    View
+                  </a>
+                </td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="5" class="text-center">
+                  No materials uploaded yet.
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+{% endblock %}

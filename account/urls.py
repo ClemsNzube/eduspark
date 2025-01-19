@@ -11,4 +11,8 @@ urlpatterns = [
     path('submit_answer/<int:content_id>/', views.submit_answer, name='submit_answer'),
     path('attendance/', views.view_attendance, name='view_attendance'),
     path('attendance/', views.student_attendance, name='student_attendance'),
+    path('calendar/', views.calendar_view, name='calendar'),
+    path('create-event/', views.create_event, name='create_event'),
+    path('materials/', views.materials_view, name='materials'),
+    path('report/<int:report_id>/', views.student_report, name='student_report'),
 ]
