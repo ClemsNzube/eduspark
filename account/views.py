@@ -1,3 +1,4 @@
+from datetime import timedelta, timezone
 from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.forms import AuthenticationForm
@@ -8,7 +9,7 @@ from django.contrib.auth.decorators import login_required
 from .forms import ProfileForm
 from django.contrib import messages
 from .forms import UserSignUpForm, StudentSignUpForm, TeacherSignUpForm, ParentSignUpForm
-from .models import Content, User, Student, Teacher, Parent, Timetable, StudentClass, Task, Submission
+from .models import Attendance, Content, Subject, User, Student, Teacher, Parent, Timetable, StudentClass, Task, Submission
 
 # Sign up view for User (Student, Teacher, Parent)
 def user_signup(request):
@@ -249,16 +250,18 @@ def upload_content(request):
             content = form.save(commit=False)  # Prevent saving to the database immediately
             content.teacher = teacher_profile  # Associate the content with the teacher
 
-            # If the content is an assignment, do not associate it with a subject and instead direct it to upcoming homework
+            # Ensure subject is always assigned for assignments
             if content.content_type == 'assignment':
-                content.subject = None  # Clear the subject field for assignments
-                content.save()
-                # Redirect to the upcoming homework page after saving the assignment
+                if not content.subject:
+                    # Raise an error or handle the case where no subject is selected
+                    form.add_error('subject', 'A subject must be assigned to an assignment.')
+                    return render(request, 'upload_content.html', {'form': form, 'user': user, 'full_name': full_name})
+
+            content.save()
+            # Redirect based on content type
+            if content.content_type == 'assignment':
                 return redirect('upcoming_homework')  # Redirect to the upcoming homework page
             else:
-                # For other content types, associate with the subject
-                content.save()
-                # Redirect to the subject content page
                 return redirect('subject_content', subject_name=content.subject.name)
 
     else:
@@ -276,9 +279,8 @@ def submit_answer(request, content_id):
     # Get the assignment content
     content = get_object_or_404(Content, id=content_id, content_type='assignment')
     
-    # Check if the user is a student
     if request.method == 'POST':
-        student = Student.objects.get(user=request.user)   # Get the Student instance associated with the logged-in user
+        student = Student.objects.get(user=request.user)  # Get the Student instance associated with the logged-in user
 
         # Get the answer from the form submission
         answer = request.POST.get('answer')
@@ -286,11 +288,111 @@ def submit_answer(request, content_id):
         # Create a Submission object to store the student's answer
         submission = Submission.objects.create(
             content=content,
-            student=student,  # Assign the correct Student instance
+            student=student,
+            subject=content.subject,  # Set the subject from the content
             answer=answer
         )
 
-        # Redirect to the "Completed Assignments" page for students
-        return redirect('completed_assignments')
+        # Check if the assignment was submitted within 24 hours
+        if timezone.now() - content.date_uploaded <= timedelta(hours=24):
+            # Mark the attendance as attended and award 5 points
+            attendance, created = Attendance.objects.get_or_create(
+                student=student,
+                subject=content.subject,
+                content=content  # Associate attendance with the specific content (assignment)
+            )
+
+            attendance.attended = True
+            attendance.attendance_points = 5  # Add 5 points for attendance
+            attendance.save()
+
+        else:
+            # Mark the attendance as absent if the submission is late (more than 24 hours)
+            attendance, created = Attendance.objects.get_or_create(
+                student=student,
+                subject=content.subject,
+                content=content
+            )
+
+            attendance.attended = False
+            attendance.attendance_points = 0  # No points for late submission
+            attendance.save()
+
+        return redirect('completed_assignments')  # Redirect to the "Completed Assignments" page for students
 
     return redirect('upcoming_homework')  # Default redirect if no form submission
+
+
+@login_required
+def view_attendance(request, subject_id=None):
+    user = request.user
+    
+    # Case for student viewing their attendance
+    if hasattr(user, 'student'):  # Check if the user has a student profile
+        student_profile = user.student
+        attendances = Attendance.objects.filter(student=student_profile).select_related('subject', 'content')
+        return render(request, 'attendance_list.html', {
+            'attendances': attendances,
+            'student': student_profile,
+        })
+    
+    # Case for teacher viewing student attendance
+    elif hasattr(user, 'teacher'):  # Check if the user has a teacher profile
+        teacher_profile = user.teacher
+        
+        if not teacher_profile.assigned_class:
+            return render(request, 'attendance_list.html', {
+                'error': 'This teacher does not have an assigned class.'
+            })
+
+        # Fetch students in the teacher's assigned class
+        students_in_class = Student.objects.filter(student_class=teacher_profile.assigned_class).select_related('student_class')
+        
+        # If subject_id is provided, fetch attendance for that specific subject
+        if subject_id:
+            subject = get_object_or_404(Subject, id=subject_id)
+            if teacher_profile not in subject.teachers.all():
+                return redirect('unauthorized')  # Redirect if teacher isn't assigned to the subject
+            
+            # Get attendance records for the students in the assigned class for the specific subject
+            attendances = Attendance.objects.filter(subject=subject, student__in=students_in_class).select_related('student')
+        else:
+            # If no subject_id, fetch all attendance records for the teacher's assigned class across all subjects
+            attendances = Attendance.objects.filter(student__in=students_in_class).select_related('student', 'subject')
+
+        return render(request, 'attendance_list.html', {
+            'attendances': attendances,
+            'teacher': teacher_profile,
+            'students_in_class': students_in_class,  # Pass the students to the template
+        })
+
+
+
+
+@login_required
+def student_attendance(request):
+    """
+    View for students to see their attendance for each subject.
+    """
+    # Get the logged-in user's student profile
+    try:
+        student_profile = request.user.student  # Assuming a one-to-one relationship between user and student
+        full_name = student_profile.full_name
+        profile_type = "student"
+    except Student.DoesNotExist:
+        student_profile = None
+        full_name = "Student profile not found"
+        profile_type = "unknown"
+
+    # Fetch all the attendance records for the student, ordered by subject and assignment date
+    if student_profile:
+        attendance_records = Attendance.objects.filter(student=student_profile).select_related('subject', 'content')
+    else:
+        attendance_records = []
+
+    return render(request, 'student_attendance.html', {
+        'attendance_records': attendance_records,
+        'student': student_profile,
+        'full_name': full_name,
+        'profile_type': profile_type,
+    })

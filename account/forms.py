@@ -63,6 +63,15 @@ class ContentForm(forms.ModelForm):
         model = Content
         fields = ['subject', 'content_type', 'title', 'description', 'content_file']
 
+        def __init__(self, *args, **kwargs):
+            super().__init__(*args, **kwargs)
+            
+            # Make 'subject' required for 'assignment' content type
+            if 'content_type' in self.data and self.data.get('content_type') == 'assignment':
+                self.fields['subject'].required = True
+            elif 'content_type' in self.initial and self.initial.get('content_type') == 'assignment':
+                self.fields['subject'].required = True
+
 class SubmissionFeedbackForm(forms.ModelForm):
     class Meta:
         model = Submission

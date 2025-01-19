@@ -50,7 +50,7 @@
               {% for assignment, submissions in grouped_submissions.items %}
                 <div class="mb-4">
                   <h4>{{ assignment.title }}</h4>
-                  <p>{{ assignment.description }}</p>
+                  <p>{{ assignment.description|safe }}</p>
 
                   <ul>
                     {% for submission in submissions %}

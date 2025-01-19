@@ -1,0 +1,87 @@
+{% extends 'main.html' %}
+{% load static %}
+
+{% block content %}
+<div class="content-wrapper" style="min-height: 167px">
+  <section class="content-header">
+    <div class="container-fluid">
+      <div class="row mb-2">
+        <div class="col-sm-6">
+          <h1>Attendance Summary for {{ student.full_name }}</h1>
+        </div>
+        <div class="col-sm-6">
+          <ol class="breadcrumb float-sm-right">
+            <li class="breadcrumb-item"><a href="/user">Home</a></li>
+            <li class="breadcrumb-item active">Attendance</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="content">
+    <div class="container-fluid">
+      {% if messages %}
+      <div class="container mt-3">
+        {% for message in messages %}
+        <div
+          class="alert alert-{{ message.tags }} text-center alert-dismissible fade show"
+          role="alert"
+        >
+          {{ message }}
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="alert"
+            aria-label="Close"
+          ></button>
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      <!-- Card for Attendance Summary Section -->
+      <div class="card card-primary card-outline">
+        <div class="card-header">
+          <h3 class="card-title">Attendance Summary</h3>
+        </div>
+        <div class="card-body">
+          <table class="table table-bordered">
+            <thead>
+              <tr>
+                <th>Assignment</th>
+                <th>Subject</th>
+                <th>Attendance Status</th>
+                <th>Attendance Points</th>
+              </tr>
+            </thead>
+            <tbody>
+                {% for record in attendances %}
+                <tr>
+                    <!-- Display the student's name -->
+                    <td>{{ record.student.full_name }}</td>
+            
+                    <!-- Display the subject name -->
+                    <td>{{ record.subject.name }}</td>
+            
+                    <!-- Display the attendance status (whether attended or absent) -->
+                    <td>{{ record.attended|yesno:"Attended,Absent" }}</td>
+            
+                    <!-- Display the attendance points (if applicable) -->
+                    <td>{{ record.attendance_points }}</td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="4">No attendance records available.</td>
+                </tr>
+            {% endfor %}
+            
+ 
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+{% endblock %}

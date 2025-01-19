@@ -109,107 +109,44 @@
 
             <hr />
 
-            <div class="attendance-grades-container">
+            {% comment %} <div class="attendance-grades-container">
               <div class="header">Student Attendance and Grades</div>
-
+            
               <table class="attendance-grades-table">
                 <thead>
                   <tr>
                     <th>Student Name</th>
+                    <th>Subject</th>
                     <th>Attendance</th>
                     <th>Grade</th>
                   </tr>
                 </thead>
                 <tbody>
-                  <!-- Loop through each student and display their attendance and grade -->
-                  <tr>
-                    <td>Student 1</td>
-                    <td>Present</td>
-                    <td>A</td>
-                  </tr>
-                  <tr>
-                    <td>Student 2</td>
-                    <td>Absent</td>
-                    <td>B</td>
-                  </tr>
-                  <tr>
-                    <td>Student 3</td>
-                    <td>Present</td>
-                    <td>C</td>
-                  </tr>
-                  <tr>
-                    <td>Student 4</td>
-                    <td>Present</td>
-                    <td>B</td>
-                  </tr>
-                  <tr>
-                    <td>Student 5</td>
-                    <td>Absent</td>
-                    <td>A</td>
-                  </tr>
-                  <tr>
-                    <td>Student 6</td>
-                    <td>Present</td>
-                    <td>C</td>
-                  </tr>
-                  <tr>
-                    <td>Student 7</td>
-                    <td>Present</td>
-                    <td>B</td>
-                  </tr>
-                  <tr>
-                    <td>Student 8</td>
-                    <td>Absent</td>
-                    <td>A</td>
-                  </tr>
-                  <tr>
-                    <td>Student 9</td>
-                    <td>Present</td>
-                    <td>C</td>
-                  </tr>
-                  <tr>
-                    <td>Student 10</td>
-                    <td>Present</td>
-                    <td>B</td>
-                  </tr>
-                  <tr>
-                    <td>Student 11</td>
-                    <td>Absent</td>
-                    <td>C</td>
-                  </tr>
-                  <tr>
-                    <td>Student 12</td>
-                    <td>Present</td>
-                    <td>A</td>
-                  </tr>
-                  <tr>
-                    <td>Student 13</td>
-                    <td>Absent</td>
-                    <td>B</td>
-                  </tr>
-                  <tr>
-                    <td>Student 14</td>
-                    <td>Present</td>
-                    <td>A</td>
-                  </tr>
-                  <tr>
-                    <td>Student 15</td>
-                    <td>Present</td>
-                    <td>B</td>
-                  </tr>
+                  {% for record in attendances %}
+                    <tr>
+                      <!-- Display the student's name -->
+                      <td>{{ record.student.full_name }}</td>
+            
+                      <!-- Display the subject name -->
+                      <td>{{ record.subject.name }}</td>
+            
+                      <!-- Display the attendance status (whether attended or absent) -->
+                      <td>{{ record.attended|yesno:"Attended,Absent" }}</td>
+            
+                      <!-- Display the attendance points (if applicable) -->
+                      <td>{{ record.attendance_points }}</td>
+                    </tr>
+                  {% empty %}
+                    <tr>
+                      <td colspan="4">No attendance records available.</td>
+                    </tr>
+                  {% endfor %}
                 </tbody>
               </table>
             </div>
+             {% endcomment %}
 
-            <div class="chart-container">
-              <canvas id="attendanceChart" width="400" height="200"></canvas>
-              <canvas id="gradeChart" width="400" height="200"></canvas>
-            </div>
-            <!-- End of timetable addition -->
-          </div>
-
-          <!-- TO DO List -->
-
+         
           <!-- /.card -->
         </section>
         <!-- /.Left col -->
@@ -225,56 +162,6 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-  // Attendance Chart
-  var attendanceChart = new Chart(document.getElementById("attendanceChart"), {
-    type: "pie",
-    data: {
-      labels: ["Present", "Absent"],
-      datasets: [
-        {
-          label: "Attendance Distribution",
-          data: [12, 3], // Example data, 12 present, 3 absent
-          backgroundColor: ["#4CAF50", "#F44336"],
-          borderColor: ["#4CAF50", "#F44336"],
-          borderWidth: 1,
-        },
-      ],
-    },
-    options: {
-      responsive: true,
-      plugins: {
-        legend: {
-          position: "top",
-        },
-      },
-    },
-  });
 
-  // Grade Distribution Chart
-  var gradeChart = new Chart(document.getElementById("gradeChart"), {
-    type: "bar",
-    data: {
-      labels: ["A", "B", "C"],
-      datasets: [
-        {
-          label: "Grade Distribution",
-          data: [6, 6, 3], // Example data for grades: 6 A's, 6 B's, 3 C's
-          backgroundColor: ["#2196F3", "#FFC107", "#FF5722"],
-          borderColor: ["#2196F3", "#FFC107", "#FF5722"],
-          borderWidth: 1,
-        },
-      ],
-    },
-    options: {
-      responsive: true,
-      scales: {
-        y: {
-          beginAtZero: true,
-        },
-      },
-    },
-  });
-</script>
 <!-- /.content-wrapper -->
 {% endblock content %}

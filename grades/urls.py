@@ -2,6 +2,9 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    # Add the URL pattern for the student performance view
-    path('performance/', views.student_performance, name='student_performance'),
+    # path('grades/performance/', views.student_performance, name='student_performance'),
+    # path('grades/students/', views.teacher_view_students, name='teacher_view_students'),
+    path('grades/student/', views.student_grades, name='student_grades'),
+    path('grades/teacher/', views.teacher_grades, name='teacher_grades'),
 ]
+

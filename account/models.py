@@ -2,6 +2,9 @@ from django.contrib.auth.models import AbstractUser, BaseUserManager, Group, Per
 from django.db import models
 from django.contrib.auth.models import User
 from ckeditor.fields import RichTextField
+from django.db.models import F
+from grades.models import Grade
+from django.apps import apps  
 
 
 class CustomUserManager(BaseUserManager):
@@ -102,7 +105,7 @@ class Teacher(models.Model):
     subject = models.CharField(max_length=100)
     phone_number = models.CharField(max_length=15, blank=True)
     years_of_experience = models.PositiveIntegerField()
-
+    assigned_class = models.ForeignKey(StudentClass, on_delete=models.SET_NULL, null=True, related_name="teachers")
     def __str__(self):
         return f"{self.full_name} - {self.subject}"
 
@@ -161,9 +164,13 @@ class Content(models.Model):
         return f"{self.title} ({self.date_uploaded})"
     
 
+
+
 class Submission(models.Model):
+    # Fields remain the same
     content = models.ForeignKey(Content, on_delete=models.CASCADE, related_name='submissions')
-    student = models.ForeignKey(Student, on_delete=models.CASCADE)  # Assuming you are using Django's built-in User model for students
+    student = models.ForeignKey(Student, on_delete=models.CASCADE)
+    subject = models.ForeignKey(Subject, on_delete=models.CASCADE, related_name="submissions", null=True, blank=True)
     answer = models.TextField()
     date_submitted = models.DateTimeField(auto_now_add=True)
     status = models.CharField(
@@ -175,4 +182,36 @@ class Submission(models.Model):
 
     def __str__(self):
         return f"Submission by {self.student.full_name} for {self.content.title}"
-    
+
+    def save(self, *args, **kwargs):
+        # Check if the status has changed
+        previous_status = None
+        if self.pk:
+            previous_status = Submission.objects.get(pk=self.pk).status
+        
+        super().save(*args, **kwargs)  # Save the submission first
+
+        # Lazy load the Grade model
+        Grade = apps.get_model('grades', 'Grade')
+        grade, created = Grade.objects.get_or_create(student=self.student, subject=self.subject)
+
+        if self.status == 'correct':
+            grade.score = min(100, grade.score + 5)  # Add 5 points, cap at 100
+        elif self.status == 'incorrect' and previous_status != 'incorrect':
+            grade.score -= 10  # Deduct 10 points
+        elif self.status == 'pending' and previous_status == 'correct':
+            grade.score -= 5  # Revert the 5 points added for correct
+
+        grade.save()
+
+
+class Attendance(models.Model):
+    student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name="attendances")
+    subject = models.ForeignKey(Subject, on_delete=models.CASCADE, related_name="attendances")
+    content = models.ForeignKey('Content', on_delete=models.CASCADE, related_name="attendances")  # Link to content
+    attended = models.BooleanField(default=False)  # True if attended, False if absent
+    attendance_points = models.IntegerField(default=0)  # Default 0, 5 points if attended
+    timestamp = models.DateTimeField(auto_now_add=True)  # To store when attendance was marked
+
+    def __str__(self):
+        return f"{self.student.full_name} - {self.subject.name} - {'Attended' if self.attended else 'Absent'}"

@@ -476,17 +476,42 @@
                 </a>
                 <ul class="nav nav-treeview">
                   <li class="nav-item">
-                    <a href="{% url 'student_performance' %}" class="nav-link">
-                      <i class="far fa-circle nav-icon"></i>
-                      <p>Grades</p>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a href="{% url 'attendance' %}" class="nav-link">
-                      <i class="far fa-circle nav-icon"></i>
-                      <p>Attendance Tracking</p>
-                    </a>
-                  </li>
+                    {% if request.user.teacher %}
+                        <!-- Link for teachers to view their assigned students' grades -->
+                        <a href="{% url 'teacher_grades' %}" class="nav-link">
+                            <i class="far fa-circle nav-icon"></i>
+                            <p>View Students' Grades</p>
+                        </a>
+                    {% elif request.user.student %}
+                        <!-- Link for students to view their own grades -->
+                        <a href="{% url 'student_grades' %}" class="nav-link">
+                            <i class="far fa-circle nav-icon"></i>
+                            <p>My Grades</p>
+                        </a>
+                    {% endif %}
+                </li>
+                
+                  
+                <li class="nav-item">
+                  {% if user.student %}
+                      <!-- Link for student to view their overall attendance -->
+                      <a href="{% url 'student_attendance' %}" class="nav-link">
+                          <i class="far fa-circle nav-icon"></i>
+                          <p>Attendance Tracking</p>
+                      </a>
+                  {% elif user.teacher %}
+                      <!-- Link for teacher to see all students' attendance -->
+                      <a href="{% url 'view_attendance' %}" class="nav-link">
+                          <i class="far fa-circle nav-icon"></i>
+                          <p>Attendance Tracking</p>
+                      </a>
+                  {% endif %}
+              </li>
+              
+              
+              
+              
+              
                 </ul>
               </li>
               <li class="nav-item">

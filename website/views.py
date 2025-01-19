@@ -4,6 +4,7 @@ from django.contrib.auth.decorators import login_required
 from account.models import Submission, User, Student, Teacher, Parent, Timetable, Task , Subject, Content
 from django.utils.timezone import localtime
 from account.forms import SubmissionFeedbackForm
+from grades.models import Grade
 
 
 
@@ -136,31 +137,31 @@ def calendar(request):
     return render(request, 'calendar.html', {'full_name': full_name})
 
 
-@login_required
-def grade(request):
-    user = request.user
-    full_name = None
+# @login_required
+# def grade(request):
+#     user = request.user
+#     full_name = None
 
-    # Determine the full name based on the user's role
-    if user.role == 'student':
-        try:
-            full_name = user.student.full_name
-        except Student.DoesNotExist:
-            full_name = "Student profile not found"
-    elif user.role == 'teacher':
-        try:
-            full_name = user.teacher.full_name
-        except Teacher.DoesNotExist:
-            full_name = "Teacher profile not found"
-    elif user.role == 'parent':
-        try:
-            full_name = user.parent.full_name
-        except Parent.DoesNotExist:
-            full_name = "Parent profile not found"
-    else:
-        full_name = user.fullname  # Fallback if no specific role exists
+#     # Determine the full name based on the user's role
+#     if user.role == 'student':
+#         try:
+#             full_name = user.student.full_name
+#         except Student.DoesNotExist:
+#             full_name = "Student profile not found"
+#     elif user.role == 'teacher':
+#         try:
+#             full_name = user.teacher.full_name
+#         except Teacher.DoesNotExist:
+#             full_name = "Teacher profile not found"
+#     elif user.role == 'parent':
+#         try:
+#             full_name = user.parent.full_name
+#         except Parent.DoesNotExist:
+#             full_name = "Parent profile not found"
+#     else:
+#         full_name = user.fullname  # Fallback if no specific role exists
 
-    return render(request, 'grade.html', {'full_name': full_name})
+#     return render(request, 'grade.html', {'full_name': full_name})
 
 
 @login_required
@@ -347,7 +348,7 @@ def submitted_assignments(request):
         return redirect('home')  # Ensure only teachers can access this page
 
     # Get all submissions grouped by the assignment
-    submissions = Submission.objects.select_related('content', 'student').all()
+    submissions = Submission.objects.select_related('content', 'student', 'subject').all()
 
     # Group submissions by assignment
     grouped_submissions = {}
@@ -358,16 +359,34 @@ def submitted_assignments(request):
 
     # Handle feedback form submission
     if request.method == 'POST':
-        # Process each submission's feedback and status change
         for submission in submissions:
             feedback = request.POST.get(f'feedback_{submission.id}')
             status = request.POST.get(f'status_{submission.id}')
             
             if feedback or status:
                 # Update the submission with new feedback and status
+                previous_status = submission.status
                 submission.feedback = feedback
                 submission.status = status
                 submission.save()
+
+                # Update the student's grade for the subject
+                grade, created = Grade.objects.get_or_create(
+                    student=submission.student,
+                    subject=submission.subject
+                )
+
+                # Update grade score based on the new status
+                if status == 'correct' and previous_status != 'correct':
+                    grade.score = min(100, grade.score + 5)
+                elif status == 'incorrect' and previous_status != 'incorrect':
+                    grade.score -= 10
+                elif status == 'pending' and previous_status == 'correct':
+                    grade.score -= 5
+
+                # Ensure the grade score stays within bounds
+                grade.score = max(0, grade.score)
+                grade.save()
 
         return redirect('submitted_assignments')  # Redirect to the same page to show updates
 

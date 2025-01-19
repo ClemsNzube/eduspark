@@ -2,7 +2,9 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from ckeditor.widgets import CKEditorWidget
 from django import forms
+from django.utils.html import format_html
 from .models import *
+from grades.models import Grade  # Import Grade model from the grades app
 
 
 class UserAdmin(BaseUserAdmin):
@@ -38,9 +40,15 @@ class StudentAdmin(admin.ModelAdmin):
 
 @admin.register(Teacher)
 class TeacherAdmin(admin.ModelAdmin):
-    list_display = ('full_name', 'subject', 'phone_number', 'years_of_experience')
-    search_fields = ('full_name', 'subject')
-    list_filter = ('subject',)
+    list_display = ('full_name', 'subject', 'phone_number', 'years_of_experience', 'assigned_class_display')
+    search_fields = ('full_name', 'subject', 'phone_number', 'assigned_class__name')
+    list_filter = ('assigned_class', 'years_of_experience', 'subject')
+    ordering = ('full_name',)
+    autocomplete_fields = ('assigned_class',)
+
+    def assigned_class_display(self, obj):
+        return obj.assigned_class.name if obj.assigned_class else "No class assigned"
+    assigned_class_display.short_description = "Assigned Class"
 
 
 @admin.register(Parent)
@@ -95,31 +103,82 @@ class ContentAdmin(admin.ModelAdmin):
 # Register the Content model with the customized admin
 admin.site.register(Content, ContentAdmin)
 
-class SubmissionAdmin(admin.ModelAdmin):
-    list_display = ('student', 'content', 'date_submitted', 'status', 'feedback')
-    list_filter = ('status', 'date_submitted', 'content')
-    search_fields = ('student__full_name', 'content__title')
-    ordering = ('-date_submitted',)
-    
-    # Make 'status' and 'feedback' fields editable from the list view
-    list_editable = ('status', 'feedback')
 
-    # Customize the form view for submission editing
+
+# Inline admin for the Grade model, used in the Submission admin
+class GradeInline(admin.TabularInline):
+    model = Grade
+    extra = 1  # Display one empty form for a new Grade entry (if needed)
+
+# Admin configuration for the Submission model
+class SubmissionAdmin(admin.ModelAdmin):
+    list_display = ('student', 'subject', 'content', 'status', 'date_submitted', 'feedback')
+    list_filter = ('status', 'date_submitted', 'subject')
+    search_fields = ('student__full_name', 'content__title', 'answer')
+    ordering = ('-date_submitted',)  # Order by the most recent submissions
+    actions = ['mark_as_correct', 'mark_as_incorrect', 'mark_as_pending']
+
+    # Custom actions for marking the status of submissions
+    def mark_as_correct(self, request, queryset):
+        queryset.update(status='correct')
+    mark_as_correct.short_description = "Mark selected submissions as Correct"
+
+    def mark_as_incorrect(self, request, queryset):
+        queryset.update(status='incorrect')
+    mark_as_incorrect.short_description = "Mark selected submissions as Incorrect"
+
+    def mark_as_pending(self, request, queryset):
+        queryset.update(status='pending')
+    mark_as_pending.short_description = "Mark selected submissions as Pending"
+
+    # Inline admin for related Grade entries
+    inlines = [GradeInline]
+
+# Register the Submission model and the custom admin configuration
+admin.site.register(Submission, SubmissionAdmin)
+
+
+class AttendanceAdmin(admin.ModelAdmin):
+    # Display the fields you want in the list view
+    list_display = ('student', 'subject', 'content', 'attended', 'attendance_points', 'timestamp', 'attendance_status')
+    
+    # Add search capability for student and subject
+    search_fields = ('student__full_name', 'subject__name', 'content__title')
+    
+    # Filter by attendance status
+    list_filter = ('attended', 'subject', 'content')
+
+    # Custom method to display the attendance status with color
+    def attendance_status(self, obj):
+        if obj.attended:
+            return format_html('<span style="color: green;">Attended</span>')
+        else:
+            return format_html('<span style="color: red;">Absent</span>')
+    attendance_status.short_description = 'Attendance Status'
+
+    # Allow ordering by timestamp
+    ordering = ('-timestamp',)
+
+    # Customizing the fields for the detail view
     fieldsets = (
         (None, {
-            'fields': ('student', 'content', 'answer', 'status', 'feedback')
+            'fields': ('student', 'subject', 'content', 'attended', 'attendance_points')
         }),
-        ('Date Information', {
-            'fields': ('date_submitted',),
-            'classes': ('collapse',)
-        }),
+        # Removed the timestamp field from the form since it's auto-generated
     )
-    readonly_fields = ('date_submitted',)
 
-    # Show a count of the number of submissions per content
-    def get_queryset(self, request):
-        queryset = super().get_queryset(request)
-        return queryset.select_related('student', 'content')
+    # Exclude the 'timestamp' field from being manually edited
+    exclude = ('timestamp',)
 
-# Register the Submission model with the custom admin class
-admin.site.register(Submission, SubmissionAdmin)
+    # Allow only superusers to mark attendance
+    def has_add_permission(self, request):
+        return request.user.is_superuser
+
+    def has_change_permission(self, request, obj=None):
+        return request.user.is_superuser
+
+    def has_delete_permission(self, request, obj=None):
+        return request.user.is_superuser
+
+# Register the Attendance model with the customized admin
+admin.site.register(Attendance, AttendanceAdmin)
