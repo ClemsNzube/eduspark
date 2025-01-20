@@ -1,4 +1,5 @@
-from datetime import timedelta, timezone
+from datetime import timedelta, timezone, datetime
+from django.utils.timezone import make_aware
 from django.shortcuts import get_object_or_404, render, redirect
 from django.http import JsonResponse
 from django.contrib.auth import login, authenticate
@@ -291,7 +292,6 @@ def upload_content(request):
 
 @login_required
 def submit_answer(request, content_id):
-    # Get the assignment content
     content = get_object_or_404(Content, id=content_id, content_type='assignment')
     
     if request.method == 'POST':
@@ -308,8 +308,15 @@ def submit_answer(request, content_id):
             answer=answer
         )
 
+        # Convert date_uploaded to datetime if needed
+        date_uploaded = content.date_uploaded
+        if isinstance(date_uploaded, datetime):
+            date_uploaded_aware = date_uploaded
+        else:
+            date_uploaded_aware = make_aware(datetime.combine(date_uploaded, datetime.min.time()))
+
         # Check if the assignment was submitted within 24 hours
-        if timezone.now() - content.date_uploaded <= timedelta(hours=24):
+        if timezone.now() - date_uploaded_aware <= timedelta(hours=24):
             # Mark the attendance as attended and award 5 points
             attendance, created = Attendance.objects.get_or_create(
                 student=student,
