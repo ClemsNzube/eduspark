@@ -1,7 +1,7 @@
 from datetime import date
 from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth.decorators import login_required
-from account.models import Submission, User, Student, Teacher, Parent, Timetable, Task , Subject, Content
+from account.models import Event, Submission, User, Student, Teacher, Parent, Timetable, Task , Subject, Content
 from django.utils.timezone import localtime
 from account.forms import SubmissionFeedbackForm
 from grades.models import Grade
@@ -91,21 +91,52 @@ def teacher_dashboard(request):
 
 
 
-# Parent Dashboard
 @login_required
 def parent_dashboard(request):
     user = request.user
-    try:
-        parent_profile = user.parent
-        full_name = parent_profile.full_name  # Get full name from parent profile
-    except Parent.DoesNotExist:
-        parent_profile = None  # Handle case where the parent profile does not exist
-        full_name = "Parent profile not found"  # Fallback if profile is missing
 
+    try:
+        # Get the parent's profile
+        parent_profile = user.parent
+        full_name = parent_profile.full_name  # Get the parent's full name
+
+        # Fetch all children associated with the parent
+        children = parent_profile.children.all()
+
+        # Fetch grades for each child
+        children_grades = {
+            child: Grade.objects.filter(student=child).order_by('-last_updated')
+            for child in children
+        }
+
+        # Fetch upcoming events visible to children (general or specific to their teachers)
+        upcoming_events = Event.objects.filter(is_general=True).order_by('start_time')
+
+        # Fetch today's timetable for each child
+        today = localtime().strftime('%A')  # Get the current day of the week (e.g., "Monday")
+        children_timetables = {
+            child: Timetable.objects.filter(
+                student_class=child.student_class, day_of_week=today
+            ).order_by('start_time')
+            for child in children
+        }
+
+    except Parent.DoesNotExist:
+        parent_profile = None
+        full_name = "Parent profile not found"
+        children = []
+        children_grades = {}
+        upcoming_events = None
+        children_timetables = {}
+
+    # Render the parent dashboard template
     return render(request, 'parents-index.html', {
-        'user': user,
         'parent_profile': parent_profile,
-        'full_name': full_name,  # Pass full_name to the template
+        'full_name': full_name,  # Pass parent's full name to the template
+        'children': children,  # Pass children to the template
+        'children_grades': children_grades,  # Pass grades for each child
+        'upcoming_events': upcoming_events,  # Pass upcoming events to the template
+        'children_timetables': children_timetables,  # Pass today's timetables for each child
     })
 
 

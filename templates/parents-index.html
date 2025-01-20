@@ -1,181 +1,88 @@
-{% extends 'main.html' %} {% load static %} {% block content %}
-      <!-- Content Wrapper. Contains page content -->
-      <div class="content-wrapper">
-        <!-- Content Header (Page header) -->
-        <div class="content-header">
-          <div class="container-fluid">
-            <div class="row mb-2">
-              <div class="col-sm-6">
-                <h1 class="m-0">Welcome Back</h1>
-                <p>Here's an overview of your child's progress.</p>
-              </div>
-              <!-- /.col -->
-              <div class="col-sm-6">
-                <ol class="breadcrumb float-sm-right">
-                  <li class="breadcrumb-item"><a href="#">Home</a></li>
-                  <li class="breadcrumb-item active">Dashboard v1</li>
-                </ol>
-              </div>
-              <!-- /.col -->
-            </div>
-            <!-- /.row -->
-          </div>
-          <!-- /.container-fluid -->
+{% extends 'main.html' %}
+{% block content %}
+<div class="content-wrapper">
+  <div class="content-header">
+    <div class="container-fluid">
+      <div class="row mb-2">
+        <div class="col-sm-6">
+          <h1 class="m-0">Welcome Back {{ full_name }}</h1>
+          {% if children %}
+            <p>Here is an overview of your child:</p>
+          {% else %}
+            <p>You don't have any children linked to your account yet.</p>
+          {% endif %}
         </div>
-        <!-- /.content-header -->
-
-        <!-- Main content -->
-        <section class="content">
-          <div class="container-fluid">
-            <!-- Small boxes (Stat box) -->
-            <div class="row">
-              <div class="col-lg-3 col-6">
-                <!-- small box -->
-                <div class="small-box bg-info">
-                  <div class="inner">
-                    <h3>150</h3>
-
-                    <p>New Orders</p>
-                  </div>
-                  <div class="icon">
-                    <i class="ion ion-bag"></i>
-                  </div>
-                  <a href="#" class="small-box-footer"
-                    >More info <i class="fas fa-arrow-circle-right"></i
-                  ></a>
-                </div>
-              </div>
-              <!-- ./col -->
-              <div class="col-lg-3 col-6">
-                <!-- small box -->
-                <div class="small-box bg-success">
-                  <div class="inner">
-                    <h3>53<sup style="font-size: 20px">%</sup></h3>
-
-                    <p>Bounce Rate</p>
-                  </div>
-                  <div class="icon">
-                    <i class="ion ion-stats-bars"></i>
-                  </div>
-                  <a href="#" class="small-box-footer"
-                    >More info <i class="fas fa-arrow-circle-right"></i
-                  ></a>
-                </div>
-              </div>
-
-              <!-- ./col -->
-            </div>
-            <!-- /.row -->
-            <!-- Main row -->
-            <div class="row">
-              <!-- Left col -->
-              <section class="col-lg-7 connectedSortable">
-                <!-- Custom tabs (Charts with tabs)-->
-                <div class="card">
-                  <!-- /.card-body -->
-                </div>
-                <!-- /.card -->
-                <div id="content">
-                  <!-- Other content of your existing HTML page -->
-                  
-                  <hr />
-                    <div class="card">
-                        <h2>Upcoming Events</h2>
-                        <ul>
-                            <li>Parent-Teacher Meeting - March 15th</li>
-                            <li>Science Fair - April 2nd</li>
-                            <li>Math Exam - April 10th</li>
-                        </ul>
-                        </div>
-
-                        <div class="card">
-                        <h2>Timetable</h2>
-                        <table>
-                            <thead>
-                            <tr>
-                                <th>Day</th>
-                                <th>Subject</th>
-                                <th>Time</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            <tr>
-                                <td>Monday</td>
-                                <td>Mathematics</td>
-                                <td>8:00 AM - 9:00 AM</td>
-                            </tr>
-                            <tr>
-                                <td>Monday</td>
-                                <td>English</td>
-                                <td>9:00 AM - 10:00 AM</td>
-                            </tr>
-                            </tbody>
-                        </table>
-                        </div>
-                    </div>
-
-                  <div class="chart-container">
-                    <canvas
-                      id="attendanceChart"
-                      width="400"
-                      height="200"
-                    ></canvas>
-                    <canvas id="gradeChart" width="400" height="200"></canvas>
-                  </div>
-                  <!-- End of timetable addition -->
-                </div>
-
-                <!-- TO DO List -->
-
-                <!-- /.card -->
-              </section>
-              <!-- /.Left col -->
-              <!-- right col (We are only adding the ID to make the widgets sortable)-->
-
-              <!-- right col -->
-            </div>
-            <!-- /.row (main row) -->
-          </div>
-          <!-- /.container-fluid -->
-        </section>
-        <!-- /.content -->
+        <div class="col-sm-6">
+          <ol class="breadcrumb float-sm-right">
+            <li class="breadcrumb-item"><a href="#">Home</a></li>
+            <li class="breadcrumb-item active">Dashboard</li>
+          </ol>
+        </div>
       </div>
+    </div>
+  </div>
 
-      <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-       <script>
-    const attendanceCtx = document.getElementById('attendanceChart').getContext('2d');
-    const attendanceChart = new Chart(attendanceCtx, {
-      type: 'bar',
-      data: {
-        labels: ['Present', 'Absent'],
-        datasets: [{
-          label: 'Attendance',
-          data: [20, 5],
-          backgroundColor: ['#4CAF50', '#FF5733']
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-      }
-    });
+  <section class="content">
+    <div class="container-fluid">
+      <div class="row">
+        <!-- Upcoming Events -->
+        <div class="col-lg-6">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">Upcoming Events</h3>
+            </div>
+            <div class="card-body">
+              {% if upcoming_events %}
+                <ul>
+                  {% for event in upcoming_events %}
+                    <li><strong>{{ event.name }}</strong> - {{ event.start_time|date:"M d, Y" }}: {{ event.description }}</li>
+                  {% endfor %}
+                </ul>
+              {% else %}
+                <p>No upcoming events.</p>
+              {% endif %}
+            </div>
+          </div>
+        </div>
 
-    const gradeCtx = document.getElementById('gradeChart').getContext('2d');
-    const gradeChart = new Chart(gradeCtx, {
-      type: 'doughnut',
-      data: {
-        labels: ['A', 'B', 'C', 'D'],
-        datasets: [{
-          label: 'Grades',
-          data: [10, 7, 5, 2],
-          backgroundColor: ['#FFEB3B', '#2196F3', '#4CAF50', '#F44336']
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-      }
-    });
-  </script>
-      <!-- /.content-wrapper -->
- {% endblock content %}
+        <!-- Today's Timetable -->
+        {% for child, timetable in children_timetables.items %}
+        <div class="col-lg-6">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">Today's Classes for {{ child.full_name }}</h3>
+            </div>
+            <div class="card-body">
+              {% if timetable %}
+                <table class="table table-bordered">
+                  <thead>
+                    <tr>
+                      <th>Time</th>
+                      <th>Subject</th>
+                      <th>Teacher</th>
+                      <th>Room</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for class in timetable %}
+                      <tr>
+                        <td>{{ class.start_time|time:"H:i" }} - {{ class.end_time|time:"H:i" }}</td>
+                        <td>{{ class.subject }}</td>
+                        <td>{{ class.teacher }}</td>
+                        <td>{{ class.room }}</td>
+                      </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              {% else %}
+                <p>No classes scheduled for today.</p>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+</div>
+{% endblock content %}

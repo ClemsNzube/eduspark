@@ -353,6 +353,30 @@
                 
               </li>
 
+              <!-- Parent Menu -->
+              {% if user.parent %}
+              
+              <li class="nav-item">
+                <a href="{% url 'parent_grades' %}" class="nav-link">
+                  <i class="nav-icon fas fa-chart-pie"></i>
+                  <p>View Grades</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="{% url 'parent_attendance' %}" class="nav-link">
+                  <i class="nav-icon fas fa-calendar-alt"></i>
+                    <p>View Attendance</p>
+                </a>
+                
+              </li>
+              <li class="nav-item">
+                <a href="#" class="nav-link">
+                  <i class="nav-icon far fa-image"></i>
+                  <p>Report</p>
+                </a>
+              </li>
+              {% else %}
+
               <li class="nav-item">
                 <a href="#" class="nav-link">
                   <i class="nav-icon fas fa-copy"></i>
@@ -534,6 +558,8 @@
               </li>
               <br /><br />
               <hr />
+              {% endif %}
+
 
               <li class="nav-item">
                 <a href="{% url 'home' %}" class="nav-link">
@@ -600,8 +626,8 @@
     <!-- AdminLTE App -->
     <script src="{% static 'dist/js/adminlte.js' %}"></script>
     <!-- AdminLTE for demo purposes -->
-    <script src="{% static 'dist/js/demo.js' %}"></script>
+    {% comment %} <script src="{% static 'dist/js/demo.js' %}"></script> {% endcomment %}
     <!-- AdminLTE dashboard demo (This is only for demo purposes) -->
-    <script src="{% static 'dist/js/pages/dashboard.js' %}"></script>
+    {% comment %} <script src="{% static 'dist/js/pages/dashboard.js' %}"></script> {% endcomment %}
   </body>
 </html>

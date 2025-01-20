@@ -78,7 +78,14 @@ def user_signup(request):
                     parent.user = user
                     parent.full_name = parent_form.cleaned_data.get('full_name')
                     parent.phone_number = parent_form.cleaned_data.get('phone_number')
-                    parent.save()
+                    parent.save()  # Save the Parent instance first to get the ID
+                    
+                    # Save the children (Many-to-Many relationship)
+                    children = parent_form.cleaned_data.get('children')  # Get selected children
+                    parent.children.set(children)  # Use set() to add the relationships
+
+                    parent.save()  # Save again after setting the Many-to-Many field
+
 
             # Log the user in after successful signup
             login(request, user)
@@ -525,3 +532,41 @@ def student_report(request, report_id):
 
     # Render the template with the context
     return render(request, 'report.html', context)
+
+
+@login_required
+def parent_attendance(request):
+    """
+    View for parents to see their child's attendance for each subject.
+    """
+    user = request.user
+    
+    # Check if the user has a parent profile (assuming a one-to-one relationship between user and parent)
+    try:
+        parent_profile = user.parent  # Assuming the User model has a related Parent profile
+        children_profiles = parent_profile.children.all()  # Get all children related to the parent
+        profile_type = "parent"
+        full_name = parent_profile.full_name  # Set full_name to the parent's full name
+    except Parent.DoesNotExist:
+        parent_profile = None
+        children_profiles = []
+        full_name = "Parent profile or children not found"
+        profile_type = "unknown"
+
+    # Check if we have any children profiles
+    if children_profiles:
+        # You can either select a specific child for the parent to view or iterate through all
+        student_profile = children_profiles.first()  # Just take the first child (you can change this logic)
+        
+        # Fetch all attendance records for the first child, ordered by subject and assignment date
+        attendance_records = Attendance.objects.filter(student=student_profile).select_related('subject', 'content').order_by('-timestamp')
+    else:
+        attendance_records = []
+        student_profile = None  # No student profile if there are no children
+    
+    return render(request, 'parent_attendance.html', {
+        'attendance_records': attendance_records,
+        'full_name': full_name,  # Parent's full name is now passed to the template
+        'profile_type': profile_type,
+        'student': student_profile,
+    })

@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from account.models import Student, Submission, Subject, Teacher
+from account.models import Parent, Student, Submission, Subject, Teacher
 from django.shortcuts import get_object_or_404, render
 from .models import Grade
 from django.db.models import F
@@ -63,4 +63,46 @@ def teacher_grades(request):
         'grades': grades,
         'students': students,
         'teacher': teacher,
+    })
+
+
+@login_required
+def parent_grades(request):
+    """
+    View for parents to see their child's grades for each subject.
+    """
+    # Get the logged-in user's parent profile
+    try:
+        parent_profile = request.user.parent  # Assuming a one-to-one relationship between user and parent
+        full_name = parent_profile.full_name
+        profile_type = "parent"
+    except Parent.DoesNotExist:
+        parent_profile = None
+        full_name = "Parent profile not found"
+        profile_type = "unknown"
+
+    # Get the children linked to the parent (Many-to-many relationship)
+    if parent_profile:
+        children = parent_profile.children.all()  # All students (children) linked to this parent
+    else:
+        children = []
+
+    # Get grades for each child
+    grades_data = []
+    for child in children:
+        grades = Grade.objects.filter(student=child).select_related('subject')  # Fetch grades for the student
+        total_score = 0
+        if grades.exists():
+            total_score = sum(grade.score for grade in grades) / grades.count()
+        grades_data.append({
+            'student': child,
+            'grades': grades,
+            'total_score': total_score
+        })
+
+    return render(request, 'parent_grades.html', {
+        'grades_data': grades_data,
+        'parent': parent_profile,
+        'full_name': full_name,
+        'profile_type': profile_type,
     })

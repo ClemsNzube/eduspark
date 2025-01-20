@@ -1,0 +1,141 @@
+{% extends 'main.html' %}
+{% load static %}
+
+{% block content %}
+<div class="content-wrapper" style="min-height: 167px">
+  <section class="content-header">
+    <div class="container-fluid">
+      <div class="row mb-2">
+        <div class="col-sm-6">
+          <h1>Grades for your child, {{ parent.full_name }}</h1>
+        </div>
+        <div class="col-sm-6">
+          <ol class="breadcrumb float-sm-right">
+            <li class="breadcrumb-item"><a href="/user">Home</a></li>
+            <li class="breadcrumb-item active">Grades</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="content">
+    <div class="container-fluid">
+      {% if messages %}
+      <div class="container mt-3">
+        {% for message in messages %}
+        <div
+          class="alert alert-{{ message.tags }} text-center alert-dismissible fade show"
+          role="alert"
+        >
+          {{ message }}
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="alert"
+            aria-label="Close"
+          ></button>
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      <!-- Card for Student Grades -->
+      {% for data in grades_data %}
+      <div class="card card-primary card-outline">
+        <div class="card-header">
+          <h3 class="card-title">Grades for {{ data.student.full_name }}</h3>
+        </div>
+        <div class="card-body">
+          <div style="width: 100%; background-color: #ddd; border-radius: 8px; height: 20px;">
+            <div style="
+                width: {{ data.total_score|floatformat:2 }}%;
+                height: 100%;
+                border-radius: 8px;
+                background-color: 
+                    {% if data.total_score < 40 %}
+                        red
+                    {% elif data.total_score < 60 %}
+                        yellow
+                    {% else %}
+                        green
+                    {% endif %};
+            ">
+            </div>
+          </div>
+          <p>Total Score: {{ data.total_score|floatformat:2 }}%</p>
+
+          <!-- Grades Table -->
+          <table class="table table-bordered">
+            <thead>
+              <tr>
+                <th>Subject</th>
+                <th>Score</th>
+                <th>Grade</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for grade in data.grades %}
+              <tr>
+                <td>{{ grade.subject.name }}</td>
+                <td>{{ grade.score }}</td>
+                <td>{{ grade.letter_grade }}</td>
+              </tr>
+
+              <script>console.log("Grade Subject: {{ grade.subject.name }} | Score: {{ grade.score }}")</script>
+              {% endfor %}
+
+            </tbody>
+          </table>
+<br>
+
+          <!-- Card for Performance Chart Section -->
+          <div class="card card-primary card-outline">
+            <div class="card-header">
+              <h3 class="card-title">Performance by Subject</h3>
+            </div>
+            <div class="card-body">
+              <canvas id="gradesChart{{ data.student.id }}" width="400" height="200"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+      <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+      <script>
+          const ctx = document.getElementById('gradesChart{{ data.student.id }}').getContext('2d');
+          const gradesChart = new Chart(ctx, {
+              type: 'bar',
+              data: {
+                  labels: [{% for grade in data.grades %}'{{ grade.subject.name }}'{% if not forloop.last %}, {% endif %}{% endfor %}],
+                  datasets: [{
+                      label: 'Scores',
+                      data: [{% for grade in data.grades %}{{ grade.score }}{% if not forloop.last %}, {% endif %}{% endfor %}],
+                      backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                      borderColor: 'rgba(75, 192, 192, 1)',
+                      borderWidth: 1
+                  }]
+              },
+              options: {
+                  scales: {
+                      y: {
+                          beginAtZero: true,
+                          max: 100
+                      }
+                  },
+                  plugins: {
+                      legend: {
+                          display: false
+                      }
+                  }
+              }
+          });
+      </script>
+      {% endfor %}
+
+      
+
+    </div>
+  </section>
+</div>
+{% endblock %}
