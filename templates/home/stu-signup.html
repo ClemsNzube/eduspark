@@ -1,66 +1,172 @@
-{% extends 'home/base.html' %} {% block content %}
-<div class="container mt-5" style="max-width: 800px">
+{% extends 'home/base.html' %}
+
+{% block content %}
+<div class="container mt-5" style="max-width: 800px;">
   <div class="row justify-content-center">
     <div class="col-md-12">
-      <div class="card shadow" style="border-radius: 12px; overflow: hidden">
+      <div class="card shadow" style="border-radius: 12px; overflow: hidden; border: 1px solid #fcd34d;">
         <!-- Card Header -->
-        <div
-          class="card-header text-center bg-warning text-black"
-          style="padding: 1.5rem"
-        >
-          <h4 style="margin: 0; font-weight: bold; text-transform: uppercase">
+        <div class="card-header text-center bg-warning text-black" style="padding: 1.5rem;">
+          <h4 style="margin: 0; font-weight: bold; text-transform: uppercase;">
             {{ role|capfirst }} Sign Up
           </h4>
         </div>
 
         <!-- Card Body -->
-        <div class="card-body" style="padding: 2rem">
-          <form method="POST" style="font-size: 1rem; line-height: 1.5">
+        <div class="card-body" style="padding: 2rem; background-color: #fff8e1;">
+          <form method="POST" style="font-size: 1rem; line-height: 1.5;">
             {% csrf_token %}
 
             <!-- User Form -->
-            <div class="form-group" style="margin-bottom: 1.5rem">
-              {{ user_form.as_p }}
+            <div class="form-group" style="margin-bottom: 1.5rem;">
+              <label for="id_email" style="font-weight: bold;">Email Address</label>
+              {{ user_form.email }}
+              <div class="invalid-feedback">
+                {% for field in user_form.email.errors %}
+                  <p>{{ field }}</p>
+                {% endfor %}
+              </div>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 1.5rem;">
+              <label for="id_password1" style="font-weight: bold;">Password</label>
+              {{ user_form.password1 }}
+              <div class="invalid-feedback">
+                {% for field in user_form.password1.errors %}
+                  <p>{{ field }}</p>
+                {% endfor %}
+              </div>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 1.5rem;">
+              <label for="id_password2" style="font-weight: bold;">Confirm Password</label>
+              {{ user_form.password2 }}
+              <div class="invalid-feedback">
+                {% for field in user_form.password2.errors %}
+                  <p>{{ field }}</p>
+                {% endfor %}
+              </div>
             </div>
 
             <!-- Role-Specific Forms -->
             {% if role == 'student' %}
-            <h5
-              class="mt-4 text-primary"
-              style="font-size: 1.25rem; font-weight: bold"
-            >
+            <h5 class="mt-4 text-warning" style="font-size: 1.25rem; font-weight: bold;">
               Student Information
             </h5>
-            <div class="form-group" style="margin-bottom: 1.5rem">
-              {{ student_form.as_p }}
+            <div class="form-group" style="margin-bottom: 1.5rem;">
+              <label for="id_full_name" style="font-weight: bold;">Full Name</label>
+              {{ student_form.full_name }}
+              <div class="invalid-feedback">
+                {% for field in student_form.full_name.errors %}
+                  <p>{{ field }}</p>
+                {% endfor %}
+              </div>
+            </div>
+            <div class="form-group" style="margin-bottom: 1.5rem;">
+              <label for="id_date_of_birth" style="font-weight: bold;">Date of Birth</label>
+              {{ student_form.date_of_birth }}
+              <div class="invalid-feedback">
+                {% for field in student_form.date_of_birth.errors %}
+                  <p>{{ field }}</p>
+                {% endfor %}
+              </div>
+            </div>
+            <div class="form-group" style="margin-bottom: 1.5rem;">
+              <label for="id_student_class" style="font-weight: bold;">Class</label>
+              {{ student_form.student_class }}
+              <div class="invalid-feedback">
+                {% for field in student_form.student_class.errors %}
+                  <p>{{ field }}</p>
+                {% endfor %}
+              </div>
+            </div>
+            <div class="form-group" style="margin-bottom: 1.5rem;">
+              <label for="id_address" style="font-weight: bold;">Address</label>
+              {{ student_form.address }}
+              <div class="invalid-feedback">
+                {% for field in student_form.address.errors %}
+                  <p>{{ field }}</p>
+                {% endfor %}
+              </div>
             </div>
             {% elif role == 'teacher' %}
-            <h5
-              class="mt-4 text-primary"
-              style="font-size: 1.25rem; font-weight: bold"
-            >
+            <h5 class="mt-4 text-warning" style="font-size: 1.25rem; font-weight: bold;">
               Teacher Information
             </h5>
-            <div class="form-group" style="margin-bottom: 1.5rem">
-              {{ teacher_form.as_p }}
+            <div class="form-group" style="margin-bottom: 1.5rem;">
+              <label for="id_full_name" style="font-weight: bold;">Full Name</label>
+              {{ teacher_form.full_name }}
+              <div class="invalid-feedback">
+                {% for field in teacher_form.full_name.errors %}
+                  <p>{{ field }}</p>
+                {% endfor %}
+              </div>
+            </div>
+            <div class="form-group" style="margin-bottom: 1.5rem;">
+              <label for="id_subject" style="font-weight: bold;">Subject</label>
+              {{ teacher_form.subject }}
+              <div class="invalid-feedback">
+                {% for field in teacher_form.subject.errors %}
+                  <p>{{ field }}</p>
+                {% endfor %}
+              </div>
+            </div>
+            <div class="form-group" style="margin-bottom: 1.5rem;">
+              <label for="id_phone_number" style="font-weight: bold;">Phone Number</label>
+              {{ teacher_form.phone_number }}
+              <div class="invalid-feedback">
+                {% for field in teacher_form.phone_number.errors %}
+                  <p>{{ field }}</p>
+                {% endfor %}
+              </div>
+            </div>
+            <div class="form-group" style="margin-bottom: 1.5rem;">
+              <label for="id_years_of_experience" style="font-weight: bold;">Years of Experience</label>
+              {{ teacher_form.years_of_experience }}
+              <div class="invalid-feedback">
+                {% for field in teacher_form.years_of_experience.errors %}
+                  <p>{{ field }}</p>
+                {% endfor %}
+              </div>
             </div>
             {% elif role == 'parent' %}
-            <h5
-              class="mt-4 text-primary"
-              style="font-size: 1.25rem; font-weight: bold"
-            >
+            <h5 class="mt-4 text-warning" style="font-size: 1.25rem; font-weight: bold;">
               Parent Information
             </h5>
-            <div class="form-group" style="margin-bottom: 1.5rem">
-              {{ parent_form.as_p }}
+            <div class="form-group" style="margin-bottom: 1.5rem;">
+              <label for="id_full_name" style="font-weight: bold;">Full Name</label>
+              {{ parent_form.full_name }}
+              <div class="invalid-feedback">
+                {% for field in parent_form.full_name.errors %}
+                  <p>{{ field }}</p>
+                {% endfor %}
+              </div>
+            </div>
+            <div class="form-group" style="margin-bottom: 1.5rem;">
+              <label for="id_phone_number" style="font-weight: bold;">Phone Number</label>
+              {{ parent_form.phone_number }}
+              <div class="invalid-feedback">
+                {% for field in parent_form.phone_number.errors %}
+                  <p>{{ field }}</p>
+                {% endfor %}
+              </div>
+            </div>
+            <div class="form-group" style="margin-bottom: 1.5rem;">
+              <label for="id_children" style="font-weight: bold;">Children</label>
+              {{ parent_form.children }}
+              <div class="invalid-feedback">
+                {% for field in parent_form.children.errors %}
+                  <p>{{ field }}</p>
+                {% endfor %}
+              </div>
             </div>
             {% endif %}
 
             <!-- Submit Button -->
             <button
               type="submit"
-              class="btn btn-primary btn-block"
-              style="padding: 12px; font-size: 1.2rem; font-weight: bold"
+              class="btn btn-warning btn-block"
+              style="padding: 12px; font-size: 1.2rem; font-weight: bold; margin-top: 1.5rem; border-radius: 6px;"
             >
               Create Account
             </button>

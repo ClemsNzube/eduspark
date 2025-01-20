@@ -3,6 +3,10 @@ from django.shortcuts import get_object_or_404, render, redirect
 from django.http import JsonResponse
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.forms import AuthenticationForm
+from io import BytesIO
+from django.http import HttpResponse
+from xhtml2pdf import pisa
+from decimal import Decimal
 from django.contrib.auth.forms import PasswordResetForm
 from .forms import ContentForm, LoginForm
 from django.utils.timezone import localtime
@@ -13,6 +17,7 @@ from .forms import UserSignUpForm, StudentSignUpForm, TeacherSignUpForm, ParentS
 from .models import *
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.template.loader import render_to_string
 
 # Sign up view for User (Student, Teacher, Parent)
 def user_signup(request):
@@ -517,22 +522,87 @@ def materials_view(request):
 
 
 
-def student_report(request, report_id):
-    # Fetch the report, student, and school data based on the report_id
-    report = get_object_or_404(StudentReport, id=report_id)
-    student = report.student
-    school = School.objects.first()  # Assuming the school is a single instance
+@login_required
+def generate_report(request):
+    """
+    View for generating a report document for the logged-in student.
+    """
+    user = request.user  # Get the logged-in user
+    
+    try:
+        student = user.student  # Assuming the User model has a related Student profile
+        school = student.school  # Assuming the Student model has a 'school' field
+    except Student.DoesNotExist:
+        return HttpResponse('Student profile not found', status=404)
+    
+    # Get grades for the student
+    grades = Grade.objects.filter(student=student).select_related('subject')
+    attendance = Attendance.objects.filter(student=student).select_related('subject')
+    
+    # Calculate total grades and attendance
+    total_grades = sum(grade.score for grade in grades)
+    total_attendance_points = sum(attendance.attendance_points for attendance in attendance)
+    
+    # Calculate the averages
+    total_subjects = grades.count()
+    total_attendance_subjects = attendance.count()
 
-    # Pass the context to the template
+    if total_subjects > 0:
+        average_grade = Decimal(total_grades) / total_subjects  # Convert to Decimal
+    else:
+        average_grade = Decimal(0)  # Use Decimal for consistency
+
+    if total_attendance_subjects > 0:
+        average_attendance = Decimal(total_attendance_points) / total_attendance_subjects  # Convert to Decimal
+    else:
+        average_attendance = Decimal(0)  # Use Decimal for consistency
+
+    combined_average = (average_grade + average_attendance) / 2
+    
+    # Determine overall grade based on the combined average
+    if combined_average >= Decimal(75):
+        overall_grade = 'Distinction'
+    elif combined_average >= Decimal(60):
+        overall_grade = 'Credit'
+    elif combined_average >= Decimal(50):
+        overall_grade = 'Merit'
+    elif combined_average >= Decimal(40):
+        overall_grade = 'Pass'
+    else:
+        overall_grade = 'Failure'
+    
+    # Get student report for the student
+    report, created = StudentReport.objects.get_or_create(
+        student=student, school=school, 
+        defaults={'total_average': combined_average, 'overall_grade': overall_grade}
+    )
+    
+    # Prepare context for rendering the template
     context = {
-        'report': report,
         'student': student,
         'school': school,
+        'grades': grades,
+        'attendance': attendance,
+        'total_grades': total_grades,
+        'total_attendance_points': total_attendance_points,
+        'average_grade': average_grade,
+        'average_attendance': average_attendance,
+        'combined_average': combined_average,
+        'overall_grade': overall_grade,
     }
 
-    # Render the template with the context
-    return render(request, 'report.html', context)
-
+    # Render the template into HTML
+    html = render_to_string('report.html', context)
+    
+    # Convert the HTML to a PDF document
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="{student.full_name}_report.pdf"'
+    
+    pisa_status = pisa.CreatePDF(html, dest=response)
+    if pisa_status.err:
+        return HttpResponse('Error generating PDF', status=500)
+    
+    return response
 
 @login_required
 def parent_attendance(request):
@@ -570,3 +640,37 @@ def parent_attendance(request):
         'profile_type': profile_type,
         'student': student_profile,
     })
+
+
+@login_required
+def parent_report(request):
+    """
+    View for parents to access their child's report.
+    Assumes each parent has only one child.
+    """
+    user = request.user
+    try:
+        # Get the parent profile linked to the logged-in user
+        parent_profile = user.parent
+        full_name = parent_profile.full_name  # Assuming Parent model has a full_name field
+
+        # Fetch the first (and only) child linked to the parent
+        child = parent_profile.children.first()
+        if not child:
+            raise ValueError("No child linked to this parent profile.")
+
+        # Fetch or create the report for the child
+        report = StudentReport.objects.get_or_create(student=child)[0]
+
+        # Pass necessary data to the template
+        context = {
+            'full_name': full_name,
+            'report': report,
+        }
+        return render(request, 'parent_reports.html', context)
+
+    except (Parent.DoesNotExist, ValueError) as e:
+        # Handle cases where the parent profile or child is not found
+        return render(request, 'error.html', {
+            'message': str(e) or "Parent profile or child not found."
+        })

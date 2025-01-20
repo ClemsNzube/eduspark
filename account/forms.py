@@ -53,6 +53,10 @@ class ProfileForm(forms.ModelForm):
             'dob': forms.DateInput(attrs={'type': 'date'}),
         }
 
+# class ProfilePictureForm(forms.ModelForm):
+#     class Meta:
+#         model = User
+#         fields = ['image']
 
 class LoginForm(forms.Form):
     email = forms.EmailField(widget=forms.EmailInput(attrs={'class': 'form-control'}))

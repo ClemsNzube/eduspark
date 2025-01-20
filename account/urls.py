@@ -15,5 +15,8 @@ urlpatterns = [
     path('calendar/', views.calendar_view, name='calendar'),
     path('create-event/', views.create_event, name='create_event'),
     path('materials/', views.materials_view, name='materials'),
-    path('report/<int:report_id>/', views.student_report, name='student_report'),
+    path('generate-report/', views.generate_report, name='generate_report'), 
+    path('parent/reports/', views.parent_report, name='parent_report'),
+    
+    # For viewing a specific child's report
 ]

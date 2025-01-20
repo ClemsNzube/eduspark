@@ -175,7 +175,7 @@
     <header class="header_section" >
       <div class="container">
         <nav class="navbar navbar-expand-lg custom_nav-container " style="color: #333333;">
-          <a class="navbar-brand" href="index.html" style="color: #333333;">
+          <a class="navbar-brand" href="{% url 'home' %}" style="color: #333333;">
             <span style="color: #333333;">
               EduSpark
             </span>
@@ -193,11 +193,11 @@
                 </li> -->
                
                 <li class="nav-item">
-                  <a class="nav-link" href="" style="color: #333333;" data-toggle="modal" data-target="#roleModal"> Sign Up </a>
+                  <a class="nav-link" href="{% url 'user_signup' %}" style="color: #333333;" data-toggle="modal" data-target="#roleModal"> Sign Up </a>
                 </li>
 
                 <li class="nav-item">
-                  <a class="nav-link" href="contact.html" style="color: #333333;">Login</a>
+                  <a class="nav-link" href="{% url 'login' %}" style="color: #333333;">Login</a>
                 </li>
 
               </ul>

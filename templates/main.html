@@ -291,18 +291,33 @@
         <!-- Sidebar -->
         <div class="sidebar">
           <!-- Sidebar user panel (optional) -->
-          <div class="user-panel mt-3 pb-3 mb-3 d-flex">
-            <div class="image">
-              <img
-                src="{{ user.image }}"
-                class="img-circle elevation-2"
-                alt="User Image"
-              />
-            </div>
+          <div class="user-panel mt-3 pb-3 mb-1 d-flex align-items-center" style="padding-left: 0;">
+            {% if user.image %}
+            <img
+                class="profile-user-img img-fluid img-circle"
+                src="{{ user.image.url }}"
+                alt="User profile picture"
+                style="width: 40px; height: 40px; object-fit: cover; margin-right: 8px; margin-left: 0;"  
+            />
+            {% else %}
+            <img
+                class="profile-user-img img-fluid img-circle"
+                src="{% static 'assets/img/logo/logo.jpg' %}"
+                alt="User profile picture"
+                style="width: 40px; height: 40px; object-fit: cover; margin-right: 8px; margin-left: 0;" 
+            />
+            {% endif %}
             <div class="info">
-              <a href="{% url 'profile' %}" class="d-block">{{ full_name }}</a>
+                <a href="{% url 'profile' %}" class="d-block text-decoration-none text-white fw-bold">
+                    {{ full_name }}
+                </a>
             </div>
-          </div>
+        </div>
+        
+        
+        
+        
+        
 
           <!-- SidebarSearch Form -->
           <div class="form-inline">
@@ -342,7 +357,7 @@
                 <ul class="nav nav-treeview">
                   <li class="nav-item">
                     <a
-                      href="{% if user.teacher %}{% url 'teacher_dashboard' %}{% elif user.student %}{% url 'student_dashboard' %}{% elif user.parent %}{% url 'parent_dashboard' %}{% else %}{% url 'default_dashboard' %}{% endif %}"
+                      href="{% if user.teacher %}{% url 'teacher_dashboard' %}{% elif user.student %}{% url 'student_dashboard' %}{% elif user.parent %}{% url 'parent_dashboard' %}{% else %}{% url 'home' %}{% endif %}"
                       class="nav-link active"
                     >
                       <i class="far fa-circle nav-icon"></i>
@@ -370,7 +385,7 @@
                 
               </li>
               <li class="nav-item">
-                <a href="#" class="nav-link">
+                <a href="{% url 'parent_report' %}" class="nav-link">
                   <i class="nav-icon far fa-image"></i>
                   <p>Report</p>
                 </a>
@@ -383,7 +398,6 @@
                   <p>
                     Subjects
                     <i class="fas fa-angle-left right"></i>
-                    <span class="badge badge-info right">6</span>
                   </p>
                 </a>
                 <ul class="nav nav-treeview">
@@ -545,17 +559,24 @@
                   <i class="nav-icon fas fa-table"></i>
                   <p>
                     Materials
-                    <i class="fas fa-angle-left right"></i>
                   </p>
                 </a>
               </li>
 
               <li class="nav-item">
-                <a href="" class="nav-link">
-                  <i class="nav-icon far fa-image"></i>
-                  <p>Report</p>
-                </a>
+                  {% if user.parent %}
+                    <a href="{% url 'parent_report' %}" class="nav-link">
+                      <i class="nav-icon far fa-image"></i>
+                      <p>Report</p>
+                    </a>
+                  {% elif user.student %}
+                    <a href="{% url 'generate_report' %}" class="nav-link">
+                      <i class="nav-icon far fa-image"></i>
+                      <p>Report</p>
+                    </a>
+                  {% endif %}
               </li>
+              
               <br /><br />
               <hr />
               {% endif %}

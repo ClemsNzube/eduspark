@@ -86,6 +86,16 @@ class StudentClass(models.Model):
 
     def __str__(self):
         return self.name
+    
+class School(models.Model):
+    name = models.CharField(max_length=255)
+    address = models.TextField()
+    phone = models.CharField(max_length=15)
+    email = models.EmailField()
+    logo = models.ImageField(upload_to='school_logos/', blank=True, null=True)
+
+    def __str__(self):
+        return self.name
 
 
 
@@ -95,6 +105,7 @@ class Student(models.Model):
     date_of_birth = models.DateField()
     student_class = models.ForeignKey(StudentClass, on_delete=models.CASCADE)  # Link to StudentClass
     address = models.TextField(blank=True)
+    school = models.ForeignKey(School, on_delete=models.CASCADE, blank=True, null=True)  # Add this field to link student to school
 
     def __str__(self):
         return f"{self.full_name} - {self.student_class.name}"
@@ -245,15 +256,7 @@ class Material(models.Model):
     
 
 
-class School(models.Model):
-    name = models.CharField(max_length=255)
-    address = models.TextField()
-    phone = models.CharField(max_length=15)
-    email = models.EmailField()
-    logo = models.ImageField(upload_to='school_logos/', blank=True, null=True)
 
-    def __str__(self):
-        return self.name
     
 class StudentReport(models.Model):
     GRADE_CHOICES = [
@@ -264,47 +267,62 @@ class StudentReport(models.Model):
         ('Failure', 'Failure'),
     ]
 
-    student = models.ForeignKey(Student, on_delete=models.CASCADE, limit_choices_to={'role': 'student'})
+    student = models.ForeignKey(Student, on_delete=models.CASCADE)
     school = models.ForeignKey(School, on_delete=models.CASCADE)
     total_average = models.DecimalField(max_digits=5, decimal_places=2, default=0.00)
     overall_grade = models.CharField(max_length=20, choices=GRADE_CHOICES, default='Failure')
+    total_attendance_points = models.IntegerField(default=0)  # Total attendance points
+    total_attendance_percentage = models.DecimalField(max_digits=5, decimal_places=2, default=0.00)  # Total attendance percentage
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return f"Report for {self.student.full_name} - {self.school.name}"
-    
-class SubjectGrade(models.Model):
-    report = models.ForeignKey(StudentReport, on_delete=models.CASCADE, related_name='subject_grades')
-    subject = models.ForeignKey(Subject, on_delete=models.CASCADE)
-    grade = models.DecimalField(max_digits=5, decimal_places=2)  # e.g., 75.50 for a grade
-    attendance = models.PositiveIntegerField()  # e.g., 90 for 90% attendance
 
-    def __str__(self):
-        return f"{self.subject.name} - {self.report.student.fullname}"
+    def calculate_grades_and_attendance(self):
+        # Fetch all grades for the student
+        grades = Grade.objects.filter(student=self.student)
+        
+        # Calculate the total score from all grades
+        if grades.exists():
+            total_score = sum(grade.score for grade in grades)
+            total_average = total_score / grades.count()
+            self.total_average = total_average
 
-# Signal to calculate total average and grade
-from django.db.models.signals import post_save
-from django.dispatch import receiver
+            # Determine the overall grade based on the average score
+            if total_average >= 75:
+                self.overall_grade = 'Distinction'
+            elif total_average >= 60:
+                self.overall_grade = 'Credit'
+            elif total_average >= 50:
+                self.overall_grade = 'Merit'
+            elif total_average >= 40:
+                self.overall_grade = 'Pass'
+            else:
+                self.overall_grade = 'Failure'
+        else:
+            self.total_average = 0.00
+            self.overall_grade = 'Failure'
 
-@receiver(post_save, sender=SubjectGrade)
-def calculate_report_average(sender, instance, **kwargs):
-    report = instance.report
-    grades = report.subject_grades.all()
-    total_grade = sum([grade.grade for grade in grades])
-    total_subjects = grades.count()
-    report.total_average = total_grade / total_subjects if total_subjects > 0 else 0.0
+        # Fetch all attendance records for the student
+        attendances = Attendance.objects.filter(student=self.student)
+        
+        if attendances.exists():
+            # Calculate total attendance points (5 points for each attended class)
+            total_attendance_points = sum(attendance.attendance_points for attendance in attendances)
+            self.total_attendance_points = total_attendance_points
 
-    # Determine overall grade based on the average
-    if report.total_average >= 75:
-        report.overall_grade = 'Distinction'
-    elif report.total_average >= 65:
-        report.overall_grade = 'Credit'
-    elif report.total_average >= 50:
-        report.overall_grade = 'Merit'
-    elif report.total_average >= 40:
-        report.overall_grade = 'Pass'
-    else:
-        report.overall_grade = 'Failure'
+            # Calculate attendance percentage
+            total_classes = attendances.count()
+            if total_classes > 0:
+                self.total_attendance_percentage = (total_attendance_points / (total_classes * 5)) * 100
+            else:
+                self.total_attendance_percentage = 0.00
+        else:
+            self.total_attendance_points = 0
+            self.total_attendance_percentage = 0.00
 
-    report.save()
+    def save(self, *args, **kwargs):
+        # Call calculate_grades_and_attendance before saving the report
+        self.calculate_grades_and_attendance()
+        super().save(*args, **kwargs)

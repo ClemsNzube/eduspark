@@ -261,8 +261,14 @@ class SchoolAdmin(admin.ModelAdmin):
 
 
 
-@admin.register(StudentReport)
+admin.site.register(StudentReport)
 class StudentReportAdmin(admin.ModelAdmin):
-    list_display = ('student', 'school', 'total_average', 'overall_grade', 'created_at', 'updated_at')
-    search_fields = ('student__fullname', 'school__name', 'overall_grade')
-    list_filter = ('overall_grade',)
+    list_display = ('student', 'school', 'total_average', 'overall_grade', 'total_attendance_points', 'total_attendance_percentage', 'created_at', 'updated_at')
+    list_filter = ('school', 'overall_grade')
+    search_fields = ('student__full_name', 'school__name')
+    readonly_fields = ('total_average', 'overall_grade', 'total_attendance_points', 'total_attendance_percentage')
+
+    def save_model(self, request, obj, form, change):
+        # Calculate grades and attendance before saving
+        obj.calculate_grades_and_attendance()
+        super().save_model(request, obj, form, change)
